@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "title": "New Course Launch: AI & Machine Learning",
+    "excerpt": "We're excited to announce our comprehensive AI and Machine Learning course, designed for both beginners and advanced learners.",
+    "cover_image_url": "https://via.placeholder.com/800x600/0066CC/FFFFFF?text=AI+News",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/ai-course",
+    "publish_date": "2024-01-15T10:00:00Z",
+    "read_time": "3 min read",
+    "published": true
+  },
+  {
+    "id": 2,
+    "title": "Student Success Stories: Career Transformation",
+    "excerpt": "Meet our graduates who transformed their careers after completing our certification programs. Read their inspiring journeys.",
+    "cover_image_url": "https://via.placeholder.com/800x600/009900/FFFFFF?text=Success",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/success-stories",
+    "publish_date": "2024-01-10T14:30:00Z",
+    "read_time": "5 min read",
+    "published": true
+  },
+  {
+    "id": 3,
+    "title": "Holiday Sale: Up to 50% Off All Courses",
+    "excerpt": "Don't miss our biggest sale of the year! Get massive discounts on all courses and start your learning journey today.",
+    "cover_image_url": "https://via.placeholder.com/800x600/FF6600/FFFFFF?text=Sale",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/holiday-sale",
+    "publish_date": "2024-01-05T09:00:00Z",
+    "read_time": "2 min read",
+    "published": true
+  },
+  {
+    "id": 4,
+    "title": "Workshop Announcement: Web Development Bootcamp",
+    "excerpt": "Join our intensive 3-day web development bootcamp. Hands-on training with industry experts. Limited seats available.",
+    "cover_image_url": "https://via.placeholder.com/800x600/CC0066/FFFFFF?text=Workshop",
+    "video_file_url": "https://example.com/videos/workshop-preview.mp4",
+    "content_type": "video",
+    "external_link": "https://example.com/news/webdev-bootcamp",
+    "publish_date": "2024-01-01T12:00:00Z",
+    "read_time": "4 min read",
+    "published": true
+  },
+  {
+    "id": 5,
+    "title": "New Partnership with Tech Giants",
+    "excerpt": "We're thrilled to announce partnerships with leading technology companies to provide cutting-edge training and certification.",
+    "cover_image_url": "https://via.placeholder.com/800x600/0066FF/FFFFFF?text=Partnership",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/partnerships",
+    "publish_date": "2023-12-28T16:00:00Z",
+    "read_time": "6 min read",
+    "published": true
+  },
+  {
+    "id": 6,
+    "title": "Instructor Spotlight: Meet Our Top Educators",
+    "excerpt": "Get to know the talented instructors behind our courses. Learn about their expertise and teaching philosophy.",
+    "cover_image_url": "https://via.placeholder.com/800x600/9900CC/FFFFFF?text=Instructors",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/instructor-spotlight",
+    "publish_date": "2023-12-25T10:30:00Z",
+    "read_time": "5 min read",
+    "published": true
+  },
+  {
+    "id": 7,
+    "title": "Platform Update: New Features Released",
+    "excerpt": "We've added exciting new features to enhance your learning experience. Check out the latest updates and improvements.",
+    "cover_image_url": "https://via.placeholder.com/800x600/00CC99/FFFFFF?text=Updates",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/platform-updates",
+    "publish_date": "2023-12-20T11:00:00Z",
+    "read_time": "4 min read",
+    "published": true
+  },
+  {
+    "id": 8,
+    "title": "Free Webinar: Career Planning in Tech",
+    "excerpt": "Join our free webinar on career planning in the tech industry. Get expert advice and tips for advancing your career.",
+    "cover_image_url": "https://via.placeholder.com/800x600/FF3399/FFFFFF?text=Webinar",
+    "video_file_url": "https://example.com/videos/webinar-teaser.mp4",
+    "content_type": "video",
+    "external_link": "https://example.com/news/career-webinar",
+    "publish_date": "2023-12-15T13:00:00Z",
+    "read_time": "3 min read",
+    "published": true
+  },
+  {
+    "id": 9,
+    "title": "Student Achievements: Certification Milestones",
+    "excerpt": "Celebrating our students who have successfully completed their certifications. Congratulations to all graduates!",
+    "cover_image_url": "https://via.placeholder.com/800x600/3399FF/FFFFFF?text=Achievements",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/student-achievements",
+    "publish_date": "2023-12-10T09:30:00Z",
+    "read_time": "4 min read",
+    "published": true
+  },
+  {
+    "id": 10,
+    "title": "Community Event: Annual Tech Conference",
+    "excerpt": "Mark your calendars for our annual tech conference. Network with professionals, attend workshops, and learn from experts.",
+    "cover_image_url": "https://via.placeholder.com/800x600/FF9900/FFFFFF?text=Conference",
+    "video_file_url": null,
+    "content_type": "image",
+    "external_link": "https://example.com/news/tech-conference",
+    "publish_date": "2023-12-05T15:00:00Z",
+    "read_time": "5 min read",
+    "published": true
+  }
+]

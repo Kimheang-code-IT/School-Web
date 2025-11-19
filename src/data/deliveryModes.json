@@ -1,0 +1,232 @@
+[
+  {
+    "id": 1,
+    "title": "Online Learning",
+    "description": "Learn from anywhere, anytime with our flexible online courses. Access video lectures, assignments, and interactive content at your own pace.",
+    "mode": "online",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "24/7 Access to Course Materials"
+      },
+      {
+        "feature_text": "Interactive Video Lectures"
+      },
+      {
+        "feature_text": "Online Discussion Forums"
+      },
+      {
+        "feature_text": "Mobile App Support"
+      }
+    ],
+    "link_url": "/courses?mode=online",
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "title": "Physical Classroom",
+    "description": "Join our in-person classes for hands-on learning experience. Work directly with instructors and collaborate with fellow students.",
+    "mode": "physical",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Face-to-Face Instruction"
+      },
+      {
+        "feature_text": "Hands-On Practical Sessions"
+      },
+      {
+        "feature_text": "Direct Instructor Support"
+      },
+      {
+        "feature_text": "Networking Opportunities"
+      }
+    ],
+    "link_url": "/courses?mode=physical",
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "title": "Hybrid Learning",
+    "description": "Best of both worlds! Combine online flexibility with in-person sessions. Perfect for busy professionals seeking comprehensive training.",
+    "mode": "both",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Flexible Schedule Options"
+      },
+      {
+        "feature_text": "Online + In-Person Sessions"
+      },
+      {
+        "feature_text": "Recorded Lectures Available"
+      },
+      {
+        "feature_text": "Personalized Learning Path"
+      }
+    ],
+    "link_url": "/courses?mode=both",
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "title": "Self-Paced Online",
+    "description": "Complete freedom to learn at your own speed. No deadlines, no pressure - just pure learning focused on your schedule.",
+    "mode": "online",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "No Deadlines or Time Limits"
+      },
+      {
+        "feature_text": "Lifetime Course Access"
+      },
+      {
+        "feature_text": "Study Materials Downloadable"
+      },
+      {
+        "feature_text": "Progress Tracking Tools"
+      }
+    ],
+    "link_url": "/courses?mode=online",
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "title": "Intensive Bootcamp",
+    "description": "Accelerated learning program for fast-paced professionals. Intensive sessions designed to master skills quickly.",
+    "mode": "physical",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Full-Time Immersive Training"
+      },
+      {
+        "feature_text": "Project-Based Learning"
+      },
+      {
+        "feature_text": "Career Support Included"
+      },
+      {
+        "feature_text": "Industry Mentorship"
+      }
+    ],
+    "link_url": "/courses",
+    "is_active": true
+  },
+  {
+    "id": 6,
+    "title": "Live Online Classes",
+    "description": "Real-time online classes with live instructors. Get immediate feedback and interact with classmates in virtual classrooms.",
+    "mode": "online",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Scheduled Live Sessions"
+      },
+      {
+        "feature_text": "Real-Time Q&A"
+      },
+      {
+        "feature_text": "Interactive Whiteboard"
+      },
+      {
+        "feature_text": "Recorded Sessions Available"
+      }
+    ],
+    "link_url": "/courses?mode=online",
+    "is_active": true
+  },
+  {
+    "id": 7,
+    "title": "Weekend Workshops",
+    "description": "Perfect for working professionals. Attend intensive weekend workshops without disrupting your work schedule.",
+    "mode": "physical",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Saturday & Sunday Sessions"
+      },
+      {
+        "feature_text": "Hands-On Projects"
+      },
+      {
+        "feature_text": "Small Class Sizes"
+      },
+      {
+        "feature_text": "Weekend-Friendly Schedule"
+      }
+    ],
+    "link_url": "/courses",
+    "is_active": true
+  },
+  {
+    "id": 8,
+    "title": "One-on-One Tutoring",
+    "description": "Personalized learning experience with dedicated instructor attention. Tailored curriculum based on your learning goals.",
+    "mode": "both",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Personalized Curriculum"
+      },
+      {
+        "feature_text": "Flexible Schedule"
+      },
+      {
+        "feature_text": "Direct Mentor Support"
+      },
+      {
+        "feature_text": "Custom Learning Path"
+      }
+    ],
+    "link_url": "/courses",
+    "is_active": true
+  },
+  {
+    "id": 9,
+    "title": "Corporate Training",
+    "description": "Tailored training programs for businesses and organizations. On-site or online sessions designed for your team's needs.",
+    "mode": "both",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Customized Training Programs"
+      },
+      {
+        "feature_text": "On-Site or Online Delivery"
+      },
+      {
+        "feature_text": "Team-Based Learning"
+      },
+      {
+        "feature_text": "Progress Reporting"
+      }
+    ],
+    "link_url": "/contact",
+    "is_active": true
+  },
+  {
+    "id": 10,
+    "title": "Evening Classes",
+    "description": "After-work learning sessions perfect for professionals. Evening classes that fit around your busy schedule.",
+    "mode": "physical",
+    "icon": null,
+    "features": [
+      {
+        "feature_text": "Evening Time Slots"
+      },
+      {
+        "feature_text": "Work-Friendly Schedule"
+      },
+      {
+        "feature_text": "Professional Networking"
+      },
+      {
+        "feature_text": "Balanced Learning Pace"
+      }
+    ],
+    "link_url": "/courses",
+    "is_active": true
+  }
+]

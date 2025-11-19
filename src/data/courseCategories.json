@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Programming",
+    "slug": "programming",
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "Data Science",
+    "slug": "data-science",
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "name": "Design",
+    "slug": "design",
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "name": "Marketing",
+    "slug": "marketing",
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "name": "Cybersecurity",
+    "slug": "cybersecurity",
+    "is_active": true
+  },
+  {
+    "id": 6,
+    "name": "Cloud Computing",
+    "slug": "cloud",
+    "is_active": true
+  },
+  {
+    "id": 7,
+    "name": "Business",
+    "slug": "business",
+    "is_active": true
+  },
+  {
+    "id": 8,
+    "name": "Language Learning",
+    "slug": "languages",
+    "is_active": true
+  },
+  {
+    "id": 9,
+    "name": "Photography",
+    "slug": "photography",
+    "is_active": true
+  },
+  {
+    "id": 10,
+    "name": "Music & Audio",
+    "slug": "music-audio",
+    "is_active": true
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "Tech Corporation",
+    "logo_url": "https://via.placeholder.com/150x80/0066CC/FFFFFF?text=TechCorp",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 2,
+    "name": "Global Solutions Inc",
+    "logo_url": "https://via.placeholder.com/150x80/009900/FFFFFF?text=Global",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 3,
+    "name": "Innovate Systems",
+    "logo_url": "https://via.placeholder.com/150x80/FF6600/FFFFFF?text=Innovate",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 4,
+    "name": "Digital Partners",
+    "logo_url": "https://via.placeholder.com/150x80/9900CC/FFFFFF?text=Digital",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 5,
+    "name": "Smart Technologies",
+    "logo_url": "https://via.placeholder.com/150x80/CC0066/FFFFFF?text=Smart",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 6,
+    "name": "Future Enterprises",
+    "logo_url": "https://via.placeholder.com/150x80/0066FF/FFFFFF?text=Future",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 7,
+    "name": "Apex Industries",
+    "logo_url": "https://via.placeholder.com/150x80/00CC99/FFFFFF?text=Apex",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 8,
+    "name": "Prime Solutions",
+    "logo_url": "https://via.placeholder.com/150x80/FF3399/FFFFFF?text=Prime",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 9,
+    "name": "Elite Group",
+    "logo_url": "https://via.placeholder.com/150x80/3399FF/FFFFFF?text=Elite",
+    "website_url": "https://example.com",
+    "is_visible": true
+  },
+  {
+    "id": 10,
+    "name": "Visionary Labs",
+    "logo_url": "https://via.placeholder.com/150x80/FF9900/FFFFFF?text=Vision",
+    "website_url": "https://example.com",
+    "is_visible": true
+  }
+]

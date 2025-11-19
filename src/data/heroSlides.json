@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "title": "Welcome to Our Platform",
+    "subtitle": "Discover amazing courses and products designed to help you succeed",
+    "button_text": "Explore Courses",
+    "image_url": "https://via.placeholder.com/1920x1080/0066CC/FFFFFF?text=Welcome",
+    "duration": 5,
+    "is_active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "title": "Learn at Your Own Pace",
+    "subtitle": "Access world-class education from anywhere, anytime with our flexible online courses",
+    "button_text": "Start Learning",
+    "image_url": "https://via.placeholder.com/1920x1080/009900/FFFFFF?text=Learn",
+    "duration": 6,
+    "is_active": true,
+    "order": 2
+  },
+  {
+    "id": 3,
+    "title": "Premium Quality Products",
+    "subtitle": "Shop our curated collection of high-quality products for every need",
+    "button_text": "Shop Now",
+    "image_url": "https://via.placeholder.com/1920x1080/FF6600/FFFFFF?text=Shop",
+    "duration": 5,
+    "is_active": true,
+    "order": 3
+  },
+  {
+    "id": 4,
+    "title": "Expert Instructors",
+    "subtitle": "Learn from industry professionals with years of real-world experience",
+    "button_text": "Meet Instructors",
+    "image_url": "https://via.placeholder.com/1920x1080/CC0066/FFFFFF?text=Experts",
+    "duration": 5,
+    "is_active": true,
+    "order": 4
+  },
+  {
+    "id": 5,
+    "title": "Career Growth Opportunities",
+    "subtitle": "Take your career to the next level with skills employers are looking for",
+    "button_text": "View Courses",
+    "image_url": "https://via.placeholder.com/1920x1080/0066FF/FFFFFF?text=Career",
+    "duration": 6,
+    "is_active": true,
+    "order": 5
+  },
+  {
+    "id": 6,
+    "title": "Join Thousands of Students",
+    "subtitle": "Be part of a thriving community of learners achieving their goals",
+    "button_text": "Join Now",
+    "image_url": "https://via.placeholder.com/1920x1080/9900CC/FFFFFF?text=Community",
+    "duration": 5,
+    "is_active": true,
+    "order": 6
+  },
+  {
+    "id": 7,
+    "title": "Latest Technology & Tools",
+    "subtitle": "Stay ahead with courses on cutting-edge technologies and industry tools",
+    "button_text": "Explore Tech",
+    "image_url": "https://via.placeholder.com/1920x1080/00CC99/FFFFFF?text=Technology",
+    "duration": 5,
+    "is_active": true,
+    "order": 7
+  },
+  {
+    "id": 8,
+    "title": "Certification Programs",
+    "subtitle": "Earn recognized certificates to boost your resume and career prospects",
+    "button_text": "Get Certified",
+    "image_url": "https://via.placeholder.com/1920x1080/FF3399/FFFFFF?text=Certification",
+    "duration": 6,
+    "is_active": true,
+    "order": 8
+  },
+  {
+    "id": 9,
+    "title": "24/7 Support Available",
+    "subtitle": "Get help whenever you need it with our dedicated support team",
+    "button_text": "Contact Support",
+    "image_url": "https://via.placeholder.com/1920x1080/3399FF/FFFFFF?text=Support",
+    "duration": 5,
+    "is_active": true,
+    "order": 9
+  },
+  {
+    "id": 10,
+    "title": "Special Discounts",
+    "subtitle": "Limited time offers - Save up to 50% on selected courses and products",
+    "button_text": "View Offers",
+    "image_url": "https://via.placeholder.com/1920x1080/FF9900/FFFFFF?text=Discounts",
+    "duration": 5,
+    "is_active": true,
+    "order": 10
+  }
+]

@@ -1,0 +1,5 @@
+[
+  { "code": "en", "name": "English", "is_active": true, "is_default": true },
+  { "code": "km", "name": "Khmer", "is_active": true, "is_default": false },
+  { "code": "zh", "name": "Chinese", "is_active": true, "is_default": false }
+]

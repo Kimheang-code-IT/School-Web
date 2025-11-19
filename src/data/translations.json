@@ -1,0 +1,86 @@
+{
+  "en": {
+    "hero": {
+      "welcome": "Welcome",
+      "error": "Error Loading Slideshow",
+      "no_slides": "No slides available"
+    },
+    "partners": {
+      "title": "Our Value Partners",
+      "description": "Trusted by leading organizations worldwide",
+      "no_partners": "No partners available at the moment",
+      "loading_error": "Some partners may not be available."
+    },
+    "news": {
+      "title": "News & Events",
+      "description": "Stay updated with our latest news, events, and announcements",
+      "no_items": "No news items available at the moment",
+      "loading_error": "Some news items may not be available.",
+      "more_news": "More News"
+    },
+    "academic": {
+      "programs": "Academic Programs",
+      "programs_description": "Choose your preferred learning method and start your educational journey",
+      "no_programs": "No programs available at the moment",
+      "loading_error": "Some programs may not be available.",
+      "learn_more": "Learn More",
+      "view_all_programs": "View All Programs"
+    }
+  },
+  "km": {
+    "hero": {
+      "welcome": "សូមស្វាគមន៍",
+      "error": "កំពុងមានបញ្ហាក្នុងការផ្ទុក",
+      "no_slides": "មិនមានស្លាយ"
+    },
+    "partners": {
+      "title": "ដៃគូរយៈពលរបស់យើង",
+      "description": "គួរឱ្យទុកចិត្តដោយអង្គការនាំមុខនៅទូទាំងពិភពលោក",
+      "no_partners": "មិនមានដៃគូនៅពេលនេះ",
+      "loading_error": "ដៃគូមួយចំនួនអាចមិនមាន។"
+    },
+    "news": {
+      "title": "ព័ត៌មាន និងព្រឹត្តិការណ៍",
+      "description": "ទទួលបានព័ត៌មានចុងក្រោយបំផុតរបស់យើង",
+      "no_items": "មិនមានព័ត៌មាននៅពេលនេះ",
+      "loading_error": "ព័ត៌មានមួយចំនួនអាចមិនមាន។",
+      "more_news": "ព័ត៌មានបន្ថែម"
+    },
+    "academic": {
+      "programs": "កម្មវិធីសិក្សា",
+      "programs_description": "ជ្រើសរើសវិធីសាស្ត្រសិក្សាដែលអ្នកចូលចិត្ត",
+      "no_programs": "មិនមានកម្មវិធីនៅពេលនេះ",
+      "loading_error": "កម្មវិធីមួយចំនួនអាចមិនមាន។",
+      "learn_more": "ស្វែងយល់បន្ថែម",
+      "view_all_programs": "មើលកម្មវិធីទាំងអស់"
+    }
+  },
+  "zh": {
+    "hero": {
+      "welcome": "欢迎",
+      "error": "加载幻灯片时出错",
+      "no_slides": "没有可用的幻灯片"
+    },
+    "partners": {
+      "title": "我们的价值合作伙伴",
+      "description": "受到全球领先组织的信任",
+      "no_partners": "目前没有合作伙伴",
+      "loading_error": "某些合作伙伴可能不可用。"
+    },
+    "news": {
+      "title": "新闻与活动",
+      "description": "了解我们的最新新闻、活动和公告",
+      "no_items": "目前没有新闻",
+      "loading_error": "某些新闻可能不可用。",
+      "more_news": "更多新闻"
+    },
+    "academic": {
+      "programs": "学术项目",
+      "programs_description": "选择您喜欢的学习方法，开始您的教育之旅",
+      "no_programs": "目前没有项目",
+      "loading_error": "某些项目可能不可用。",
+      "learn_more": "了解更多",
+      "view_all_programs": "查看所有项目"
+    }
+  }
+}

@@ -1,0 +1,263 @@
+[
+  {
+    "id": 1,
+    "slug": "wireless-headphones",
+    "name": "Premium Wireless Headphones",
+    "title": "Premium Wireless Headphones - Noise Cancelling",
+    "description": "Experience crystal-clear audio with our premium wireless headphones featuring active noise cancellation and 30-hour battery life.",
+    "short_description": "Premium wireless headphones with noise cancellation",
+    "price": 199.99,
+    "final_price": 149.99,
+    "compare_price": 249.99,
+    "is_discounted": true,
+    "image_url": "https://via.placeholder.com/600x600/0066CC/FFFFFF?text=Headphones",
+    "images": [
+      "https://via.placeholder.com/600x600/0066CC/FFFFFF?text=Headphones+1",
+      "https://via.placeholder.com/600x600/0066CC/FFFFFF?text=Headphones+2"
+    ],
+    "category_slug": "electronics",
+    "stock_status": "in_stock",
+    "rating": 4.5,
+    "review_count": 234,
+    "details": {
+      "options": {
+        "colors": ["Black", "White", "Blue"],
+        "sizes": ["Standard"]
+      }
+    }
+  },
+  {
+    "id": 2,
+    "slug": "smart-watch",
+    "name": "Smart Watch Pro",
+    "title": "Smart Watch Pro - Fitness Tracker",
+    "description": "Track your fitness goals with our advanced smart watch featuring heart rate monitoring, GPS, and 7-day battery life.",
+    "short_description": "Advanced smart watch with fitness tracking",
+    "price": 299.99,
+    "final_price": 299.99,
+    "compare_price": null,
+    "is_discounted": false,
+    "image_url": "https://via.placeholder.com/600x600/009900/FFFFFF?text=SmartWatch",
+    "images": [
+      "https://via.placeholder.com/600x600/009900/FFFFFF?text=Watch+1"
+    ],
+    "category_slug": "electronics",
+    "stock_status": "in_stock",
+    "rating": 4.8,
+    "review_count": 189,
+    "details": {
+      "options": {
+        "colors": ["Black", "Silver", "Rose Gold"],
+        "sizes": ["42mm", "46mm"]
+      }
+    }
+  },
+  {
+    "id": 3,
+    "slug": "laptop-bag",
+    "name": "Professional Laptop Bag",
+    "title": "Professional Laptop Bag - Water Resistant",
+    "description": "Protect your laptop with our durable, water-resistant laptop bag designed for professionals on the go.",
+    "short_description": "Durable water-resistant laptop bag",
+    "price": 79.99,
+    "final_price": 59.99,
+    "compare_price": 99.99,
+    "is_discounted": true,
+    "image_url": "https://via.placeholder.com/600x600/663300/FFFFFF?text=LaptopBag",
+    "images": [
+      "https://via.placeholder.com/600x600/663300/FFFFFF?text=Bag+1"
+    ],
+    "category_slug": "accessories",
+    "stock_status": "in_stock",
+    "rating": 4.3,
+    "review_count": 145,
+    "details": {
+      "options": {
+        "colors": ["Black", "Brown", "Navy"],
+        "sizes": ["13 inch", "15 inch", "17 inch"]
+      }
+    }
+  },
+  {
+    "id": 4,
+    "slug": "wireless-mouse",
+    "name": "Ergonomic Wireless Mouse",
+    "title": "Ergonomic Wireless Mouse - 2.4GHz",
+    "description": "Work comfortably with our ergonomic wireless mouse designed for extended use. Features precision tracking and long battery life.",
+    "short_description": "Ergonomic wireless mouse for comfortable work",
+    "price": 39.99,
+    "final_price": 29.99,
+    "compare_price": 49.99,
+    "is_discounted": true,
+    "image_url": "https://via.placeholder.com/600x600/CC0066/FFFFFF?text=Mouse",
+    "images": [
+      "https://via.placeholder.com/600x600/CC0066/FFFFFF?text=Mouse+1"
+    ],
+    "category_slug": "electronics",
+    "stock_status": "in_stock",
+    "rating": 4.6,
+    "review_count": 312,
+    "details": {
+      "options": {
+        "colors": ["Black", "White", "Pink"],
+        "sizes": ["Standard"]
+      }
+    }
+  },
+  {
+    "id": 5,
+    "slug": "mechanical-keyboard",
+    "name": "RGB Mechanical Keyboard",
+    "title": "RGB Mechanical Keyboard - Gaming",
+    "description": "Enhance your gaming experience with our RGB mechanical keyboard featuring customizable backlighting and tactile switches.",
+    "short_description": "RGB mechanical keyboard for gaming",
+    "price": 129.99,
+    "final_price": 129.99,
+    "compare_price": null,
+    "is_discounted": false,
+    "image_url": "https://via.placeholder.com/600x600/FF6600/FFFFFF?text=Keyboard",
+    "images": [
+      "https://via.placeholder.com/600x600/FF6600/FFFFFF?text=KB+1"
+    ],
+    "category_slug": "electronics",
+    "stock_status": "low_stock",
+    "rating": 4.7,
+    "review_count": 278,
+    "details": {
+      "options": {
+        "colors": ["Black", "White"],
+        "sizes": ["Full Size", "TKL"]
+      }
+    }
+  },
+  {
+    "id": 6,
+    "slug": "usb-cable",
+    "name": "USB-C Charging Cable",
+    "title": "USB-C Charging Cable - Fast Charge",
+    "description": "Fast charging USB-C cable with durable braided design. Compatible with all USB-C devices.",
+    "short_description": "Fast charging USB-C cable",
+    "price": 19.99,
+    "final_price": 14.99,
+    "compare_price": 24.99,
+    "is_discounted": true,
+    "image_url": "https://via.placeholder.com/600x600/0066FF/FFFFFF?text=USBCable",
+    "images": [
+      "https://via.placeholder.com/600x600/0066FF/FFFFFF?text=Cable+1"
+    ],
+    "category_slug": "accessories",
+    "stock_status": "in_stock",
+    "rating": 4.4,
+    "review_count": 567,
+    "details": {
+      "options": {
+        "colors": ["Black", "White", "Red"],
+        "sizes": ["1m", "2m", "3m"]
+      }
+    }
+  },
+  {
+    "id": 7,
+    "slug": "tablet-stand",
+    "name": "Adjustable Tablet Stand",
+    "title": "Adjustable Tablet Stand - Aluminum",
+    "description": "Perfect viewing angle for your tablet with our adjustable aluminum stand. Works with tablets up to 12 inches.",
+    "short_description": "Adjustable aluminum tablet stand",
+    "price": 34.99,
+    "final_price": 34.99,
+    "compare_price": null,
+    "is_discounted": false,
+    "image_url": "https://via.placeholder.com/600x600/9900CC/FFFFFF?text=TabletStand",
+    "images": [
+      "https://via.placeholder.com/600x600/9900CC/FFFFFF?text=Stand+1"
+    ],
+    "category_slug": "accessories",
+    "stock_status": "in_stock",
+    "rating": 4.2,
+    "review_count": 98,
+    "details": {
+      "options": {
+        "colors": ["Silver", "Black"],
+        "sizes": ["Standard"]
+      }
+    }
+  },
+  {
+    "id": 8,
+    "slug": "portable-speaker",
+    "name": "Bluetooth Portable Speaker",
+    "title": "Bluetooth Portable Speaker - Waterproof",
+    "description": "Take your music anywhere with our waterproof Bluetooth speaker. Features 360-degree sound and 12-hour battery.",
+    "short_description": "Waterproof Bluetooth portable speaker",
+    "price": 89.99,
+    "final_price": 69.99,
+    "compare_price": 109.99,
+    "is_discounted": true,
+    "image_url": "https://via.placeholder.com/600x600/00CC99/FFFFFF?text=Speaker",
+    "images": [
+      "https://via.placeholder.com/600x600/00CC99/FFFFFF?text=Speaker+1"
+    ],
+    "category_slug": "electronics",
+    "stock_status": "in_stock",
+    "rating": 4.5,
+    "review_count": 423,
+    "details": {
+      "options": {
+        "colors": ["Black", "Blue", "Red"],
+        "sizes": ["Standard"]
+      }
+    }
+  },
+  {
+    "id": 9,
+    "slug": "webcam-hd",
+    "name": "HD Webcam 1080p",
+    "title": "HD Webcam 1080p - Auto Focus",
+    "description": "Crystal clear video calls with our HD webcam featuring auto-focus, built-in microphone, and privacy shutter.",
+    "short_description": "HD webcam with auto-focus and microphone",
+    "price": 69.99,
+    "final_price": 54.99,
+    "compare_price": 79.99,
+    "is_discounted": true,
+    "image_url": "https://via.placeholder.com/600x600/FF3399/FFFFFF?text=Webcam",
+    "images": [
+      "https://via.placeholder.com/600x600/FF3399/FFFFFF?text=Webcam+1"
+    ],
+    "category_slug": "electronics",
+    "stock_status": "in_stock",
+    "rating": 4.6,
+    "review_count": 256,
+    "details": {
+      "options": {
+        "colors": ["Black", "White"],
+        "sizes": ["Standard"]
+      }
+    }
+  },
+  {
+    "id": 10,
+    "slug": "monitor-stand",
+    "name": "Monitor Stand with Storage",
+    "title": "Monitor Stand with Storage - Bamboo",
+    "description": "Organize your workspace with our bamboo monitor stand featuring built-in storage compartments and cable management.",
+    "short_description": "Bamboo monitor stand with storage",
+    "price": 49.99,
+    "final_price": 49.99,
+    "compare_price": null,
+    "is_discounted": false,
+    "image_url": "https://via.placeholder.com/600x600/3399FF/FFFFFF?text=MonitorStand",
+    "images": [
+      "https://via.placeholder.com/600x600/3399FF/FFFFFF?text=Stand+1"
+    ],
+    "category_slug": "accessories",
+    "stock_status": "in_stock",
+    "rating": 4.4,
+    "review_count": 187,
+    "details": {
+      "options": {
+        "colors": ["Natural Bamboo", "Dark Bamboo"],
+        "sizes": ["Standard", "Large"]
+      }
+    }
+  }
+]

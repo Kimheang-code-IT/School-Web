@@ -1,0 +1,11 @@
+{
+  "address_line1": "123 Education Street",
+  "city": "Phnom Penh",
+  "country": "Cambodia",
+  "phone_primary": "+855 12 345 678",
+  "email_primary": "contact@example.com",
+  "facebook_link": "https://facebook.com/example",
+  "instagram_link": "https://instagram.com/example",
+  "telegram_link": "https://t.me/your_username",
+  "tiktok_link": "https://tiktok.com/@example"
+}

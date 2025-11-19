@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Electronics",
+    "slug": "electronics",
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "Accessories",
+    "slug": "accessories",
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "name": "Computers",
+    "slug": "computers",
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "name": "Audio & Video",
+    "slug": "audio-video",
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "name": "Mobile Devices",
+    "slug": "mobile-devices",
+    "is_active": true
+  },
+  {
+    "id": 6,
+    "name": "Gaming",
+    "slug": "gaming",
+    "is_active": true
+  },
+  {
+    "id": 7,
+    "name": "Office Supplies",
+    "slug": "office-supplies",
+    "is_active": true
+  },
+  {
+    "id": 8,
+    "name": "Home & Living",
+    "slug": "home-living",
+    "is_active": true
+  },
+  {
+    "id": 9,
+    "name": "Fashion & Apparel",
+    "slug": "fashion-apparel",
+    "is_active": true
+  },
+  {
+    "id": 10,
+    "name": "Sports & Fitness",
+    "slug": "sports-fitness",
+    "is_active": true
+  }
+]
