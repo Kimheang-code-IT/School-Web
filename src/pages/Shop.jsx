@@ -16,7 +16,7 @@ const Shop = () => {
   const navigate = useNavigate();
   const { isCartOpen } = useUI();
   const { t } = useTranslation();
-  const { data: products = [], loading: productsLoading, error: productsError } = useProducts();
+  const { data: products = [], loading: productsLoading } = useProducts();
   const { data: categories = [] } = useProductCategories();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +35,6 @@ const Shop = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const isLoading = productsLoading;
-  const error = productsError;
 
   // Add body class for scroll control
   useEffect(() => {

@@ -5,7 +5,7 @@ import { useTranslation } from '../hooks/useTranslation.jsx';
 import { useDeliveryModes } from '../hooks/useDeliveryModes.js';
 
 const AcademicPrograms = () => {
-  const { data: deliveryModesRaw = [], loading: isLoading, error } = useDeliveryModes();
+  const { data: deliveryModesRaw = [], loading: isLoading } = useDeliveryModes();
   const [failedImages, setFailedImages] = useState([]);
 
   const { t } = useTranslation();

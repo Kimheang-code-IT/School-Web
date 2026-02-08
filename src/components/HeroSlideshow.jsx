@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, BookOpen } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation.jsx';
 import { useHeroSlides } from '../hooks/useHeroSlides.js';
 
 const HeroSlideshow = () => {
-  const { data: heroSlidesRaw = [], loading: isLoading, error } = useHeroSlides();
+  const { data: heroSlidesRaw = [], loading: isLoading } = useHeroSlides();
   const [currentSlide, setCurrentSlide] = useState(0);
   const intervalRef = useRef(null);
   const touchStartRef = useRef(null);

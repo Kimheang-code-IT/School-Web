@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
-import { 
-  ShoppingCart, Heart, Minus, Plus,
-  Share2, CheckCircle, ArrowLeft, ImageOff
-} from 'lucide-react';
+import { ShoppingCart, Heart, Minus, Plus, Share2, CheckCircle, ArrowLeft, ImageOff } from 'lucide-react';
 import ErrorDisplay from '../components/ErrorDisplay.jsx';
 import StarRating from '../components/StarRating.jsx';
 import { formatPrice } from '../utils/priceUtils.jsx';
@@ -296,6 +293,40 @@ const ProductDetail = () => {
                 </div>
               )}
             </div>
+
+            {/* Add to Cart */}
+            {product?.stock_status !== 'out_of_stock' && (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    className="p-2 sm:p-3 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    aria-label={t('product_detail.decrease_quantity', 'Decrease quantity')}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="px-3 py-2 min-w-[2.5rem] text-center font-medium" aria-live="polite">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(q => q + 1)}
+                    className="p-2 sm:p-3 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    aria-label={t('product_detail.increase_quantity', 'Increase quantity')}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60 transition-colors"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  {isAddingToCart ? t('product_detail.adding', 'Adding…') : t('product_detail.add_to_cart', 'Add to Cart')}
+                </button>
+              </div>
+            )}
 
             {/* What's Included - dynamic from product.details.included or product.included */}
             {includedItems.length > 0 && (

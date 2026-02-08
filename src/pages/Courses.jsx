@@ -15,7 +15,7 @@ const Courses = () => {
   const location = useLocation();
   const { isCartOpen } = useUI();
   const { t } = useTranslation();
-  const { data: coursesData, loading: coursesLoading, error: coursesError } = useCourses();
+  const { data: coursesData, loading: coursesLoading } = useCourses();
   const { data: courseCategoriesData } = useCourseCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -46,18 +46,6 @@ const Courses = () => {
   }, [coursesData]);
 
   const isLoading = coursesLoading;
-  const error = coursesError;
-
-  const courseStats = useMemo(() => {
-    return {
-      total_courses: courses.length,
-      total_categories: categories.length,
-      total_schedules: 0,
-      courses_by_level: [],
-      courses_by_mode: []
-    };
-  }, [courses.length, categories.length]);
-
 
   // Add body class for scroll control
   useEffect(() => {
@@ -206,7 +194,6 @@ const Courses = () => {
     }).format(price);
   };
 
-  const categoryName = categories.find(c => c.slug === selectedCategory)?.name || '';
   // SEO metadata (can be used with react-helmet if needed)
   // const title = categoryName 
   //   ? `Courses - ${categoryName} | WebsiteEcom`

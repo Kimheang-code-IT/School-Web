@@ -283,7 +283,10 @@
       "no_description": "No description available.",
       "product_description": "Product Description",
       "add_to_wishlist": "Add to Wishlist",
-      "remove_from_wishlist": "Remove from Wishlist"
+      "remove_from_wishlist": "Remove from Wishlist",
+      "adding": "Adding…",
+      "decrease_quantity": "Decrease quantity",
+      "increase_quantity": "Increase quantity"
     },
     "course_detail": {
       "back_to_courses": "Back to Courses",
@@ -635,7 +638,10 @@
       "no_description": "គ្មានការពិពណ៌នា។",
       "product_description": "ការពិពណ៌នាផលិតផល",
       "add_to_wishlist": "បន្ថែមទៅបញ្ជីចង់បាន",
-      "remove_from_wishlist": "ដកចេញពីបញ្ជីចង់បាន"
+      "remove_from_wishlist": "ដកចេញពីបញ្ជីចង់បាន",
+      "adding": "កំពុងបន្ថែម…",
+      "decrease_quantity": "បន្ថយចំនួន",
+      "increase_quantity": "បន្ថែមចំនួន"
     },
     "course_detail": {
       "back_to_courses": "ត្រលប់វគ្គសិក្សា",

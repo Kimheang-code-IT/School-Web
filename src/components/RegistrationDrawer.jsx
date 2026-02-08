@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -27,7 +27,7 @@ const RegistrationDrawer = ({ isOpen, onClose, triggerRef }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { data: coursesList = [] } = useCourses();
   const { t } = useTranslation();
-  const courses = Array.isArray(coursesList) ? coursesList : [];
+  const courses = useMemo(() => Array.isArray(coursesList) ? coursesList : [], [coursesList]);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
@@ -229,6 +229,7 @@ const RegistrationDrawer = ({ isOpen, onClose, triggerRef }) => {
 
       const allFields = [data.fullNameEnglish, data.fullNameKhmer, data.phone].filter(Boolean);
       for (const field of allFields) {
+        // eslint-disable-next-line no-script-url -- security check for script injection
         if (field && (field.includes('<script') || field.includes('javascript:') || field.includes('onerror='))) {
           toast.error('Security validation failed. Please check your input.');
           return;

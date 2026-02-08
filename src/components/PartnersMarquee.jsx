@@ -6,7 +6,7 @@ import { usePartners } from '../hooks/usePartners.js';
 const FALLBACK_LOGO_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'%3E%3Crect fill='%23f3f4f6' width='120' height='60' rx='8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='system-ui' font-size='12'%3E%3Ctspan dy='0'%3ELogo%3C/tspan%3E%3C/text%3E%3C/svg%3E";
 
 const PartnersMarquee = () => {
-  const { data: partnersRaw = [], loading: isLoading, error } = usePartners();
+  const { data: partnersRaw = [], loading: isLoading } = usePartners();
   const [failedImages, setFailedImages] = useState(new Set());
 
   const { t } = useTranslation();

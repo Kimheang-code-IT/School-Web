@@ -1,4 +1,3 @@
-import React from 'react';
 // GlobalErrorHandler is simplified since we don't have backend API
 
 /**
