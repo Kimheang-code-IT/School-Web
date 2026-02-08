@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Clock, Shield, X, RefreshCw } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation.jsx';
 
 const SecurityErrorDialog = ({ 
   isOpen, 
@@ -7,6 +8,7 @@ const SecurityErrorDialog = ({
   error,
   identifier = 'account'
 }) => {
+  const { t } = useTranslation();
   const [remainingTime, setRemainingTime] = useState(0);
   // Simplified security info without backend
   const securityInfo = error?.securityInfo || {
@@ -66,7 +68,7 @@ const SecurityErrorDialog = ({
     if (securityInfo.type === 'rate_limit') {
       return `Retry in ${securityInfo.retryAfter || 60}s`;
     }
-    return securityInfo.showContactSupport ? 'Contact Support' : 'Close';
+    return securityInfo.showContactSupport ? t('common.contact_support', 'Contact Support') : t('common.close', 'Close');
   };
 
   const handleButtonClick = () => {
@@ -96,7 +98,7 @@ const SecurityErrorDialog = ({
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close"
+            aria-label={t('common.close', 'Close')}
           >
             <X className="w-5 h-5" />
           </button>

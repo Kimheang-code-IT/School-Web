@@ -13,7 +13,7 @@ import GlobalErrorHandler from './components/GlobalErrorHandler.jsx';
 // Lazy load components for better performance
 const ResponsiveHeader = lazy(() => import('./components/ResponsiveHeader.jsx'));
 const Footer = lazy(() => import('./components/Footer.jsx'));
-const ChatbotWrapper = lazy(() => import('./components/ChatbotWrapper.jsx'));
+
 const ScrollToTop = lazy(() => import('./components/ScrollToTop.jsx'));
 
 // Lazy load pages
@@ -96,9 +96,6 @@ function App() {
                 </Suspense>
               </main>
               <ConditionalFooter />
-              <Suspense key="chatbot" fallback={null}>
-                <ChatbotWrapper />
-              </Suspense>
               <Suspense key="registration" fallback={null}>
                 <RegistrationWrapper />
               </Suspense>

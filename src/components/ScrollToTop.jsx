@@ -4,7 +4,7 @@ import { useUI } from '../context/UIContext.jsx';
 
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const { isCartOpen, isRegistrationOpen, isCheckoutOpen } = useUI();
+  const { isCartOpen, isRegistrationOpen, isCheckoutOpen, isMobileMenuOpen } = useUI();
 
   // Show button when page is scrolled down
   useEffect(() => {
@@ -28,15 +28,15 @@ const ScrollToTop = () => {
     });
   };
 
-  // Hide button when cart, checkout, or registration drawer is open
-  if (!isVisible || isCartOpen || isCheckoutOpen || isRegistrationOpen) {
+  // Hide button when cart, checkout, registration drawer, or mobile menu is open
+  if (!isVisible || isCartOpen || isCheckoutOpen || isRegistrationOpen || isMobileMenuOpen) {
     return null;
   }
 
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-24 right-8 w-12 h-12 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50"
+      className="fixed bottom-10 right-8 w-12 h-12 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50"
       title="Scroll to top"
       aria-label="Scroll to top"
     >

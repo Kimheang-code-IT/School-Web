@@ -33,6 +33,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        battambang: ['Battambang', 'system-ui', 'sans-serif'],
       },
     },
   },

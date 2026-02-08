@@ -59,14 +59,11 @@ export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
   const addToCart = (product, quantity = 1) => {
-    console.log('Adding to cart:', { product, quantity });
-    
     // Check if item already exists in cart
     const existingItem = state.items.find(item => item.product.id === product.id);
     
     if (existingItem) {
       // Update quantity if item already exists
-      console.log('Updating existing item:', existingItem);
       dispatch({ type: 'UPDATE_ITEM', payload: { id: existingItem.id, quantity: existingItem.quantity + quantity } });
       return existingItem;
     }
@@ -82,8 +79,6 @@ export const CartProvider = ({ children }) => {
       },
       quantity: quantity,
     };
-    
-    console.log('Created cart item:', cartItem);
     dispatch({ type: 'ADD_ITEM', payload: cartItem });
     return cartItem;
   };

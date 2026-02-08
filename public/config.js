@@ -9,7 +9,7 @@ window.APP_CONFIG = {
   API_TOKEN: '', // Replace with your actual token: 'your-token-here'
   
   // API Base URL
-  API_BASE_URL: process.env.REACT_APP_API_URL || '/api/v1',
+  API_BASE_URL: '/api/v1',
 };
 
 

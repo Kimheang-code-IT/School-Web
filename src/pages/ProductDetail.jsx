@@ -3,32 +3,30 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { 
   ShoppingCart, Heart, Minus, Plus,
-  Share2, CheckCircle, AlertCircle, ArrowLeft, ImageOff
+  Share2, CheckCircle, ArrowLeft, ImageOff
 } from 'lucide-react';
 import ErrorDisplay from '../components/ErrorDisplay.jsx';
 import StarRating from '../components/StarRating.jsx';
 import { formatPrice } from '../utils/priceUtils.jsx';
 import toast from 'react-hot-toast';
-import productsData from '../data/products.json';
+import { useProducts } from '../hooks/useProducts.js';
+import { useTranslation } from '../hooks/useTranslation.jsx';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { t } = useTranslation();
+  const { data: products = [] } = useProducts();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
-  const [selectedOptions, setSelectedOptions] = useState({ 
-    color: null, 
-    size: null
-  });
-  // Load product from JSON data
   const product = useMemo(() => {
-    if (!slug || !Array.isArray(productsData)) return null;
-    return productsData.find(p => p.slug === slug);
-  }, [slug]);
+    if (!slug || !Array.isArray(products)) return null;
+    return products.find(p => p.slug === slug);
+  }, [slug, products]);
 
   const isLoading = false;
   const error = product ? null : 'Product not found';
@@ -54,8 +52,8 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <ErrorDisplay
           error={error}
-          title="Product Not Found"
-          message="The product you're looking for doesn't exist or couldn't be loaded."
+          title={t('product_detail.not_found', 'Product Not Found')}
+          message={t('product_detail.not_found_message', "The product you're looking for doesn't exist or couldn't be loaded.")}
           onRetry={() => navigate('/shop')}
           isNetworkError={error?.message?.includes('Network') || error?.message?.includes('fetch')}
         />
@@ -74,7 +72,6 @@ const ProductDetail = () => {
         title: product.title || product.name,
         images: product.images || (product.image_url ? [product.image_url] : []),
         image_url: product.image_url || product.images?.[0],
-        selectedOptions,
         quantity
       }, quantity);
       
@@ -83,7 +80,6 @@ const ProductDetail = () => {
         position: 'top-right',
       });
     } catch (error) {
-      console.error('Error adding to cart:', error);
       toast.error('Failed to add item to cart', {
         duration: 3000,
         position: 'top-right',
@@ -107,7 +103,6 @@ const ProductDetail = () => {
           url: window.location.href,
         });
         } catch (error) {
-          console.log('Error sharing:', error);
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
@@ -133,17 +128,12 @@ const ProductDetail = () => {
     setImageErrors(prev => ({ ...prev, [index]: true }));
   };
   
-  // Simplified options - only color and size
-  const productDetails = product?.details || {};
-  const productOptions = productDetails.options || {};
-  const availableColors = productOptions.colors || [];
-  const availableSizes = productOptions.sizes || [];
-  
-  const hasColors = availableColors.length > 0;
-  const hasSizes = availableSizes.length > 0;
-  
-  // Check if required selections are made
-  const selectionsComplete = (!hasColors || selectedOptions.color) && (!hasSizes || selectedOptions.size);
+  // Dynamic "What's Included" from product data (details.included or included array)
+  const includedItems = Array.isArray(product?.details?.included)
+    ? product.details.included
+    : Array.isArray(product?.included)
+      ? product.included
+      : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,15 +141,15 @@ const ProductDetail = () => {
       <div className=" border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-4">
           <nav className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm overflow-x-auto">
-            <Link to="/" className="text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">Home</Link>
+            <Link to="/" className="text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">{t('nav.home', 'Home')}</Link>
             <span className="text-gray-400">/</span>
-            <Link to="/shop" className="text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">Shop</Link>
+            <Link to="/shop" className="text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">{t('nav.shop', 'Shop')}</Link>
             <span className="text-gray-400">/</span>
             <Link to={`/shop?category=${product?.category?.slug || ''}`} className="text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">
-              {product?.category?.name || 'Category'}
+              {product?.category?.name || t('common.category', 'Category')}
             </Link>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-medium truncate">{product?.title || product?.name || 'Product'}</span>
+            <span className="text-gray-900 font-medium truncate">{product?.title || product?.name || t('product_detail.product', 'Product')}</span>
           </nav>
         </div>
       </div>
@@ -174,7 +164,7 @@ const ProductDetail = () => {
                 {(!hasImages || imageErrors[selectedImage]) ? (
                   <div className="flex flex-col items-center justify-center text-gray-400">
                     <ImageOff className="w-24 h-24 sm:w-32 sm:h-32 mb-4" />
-                    <p className="text-sm sm:text-base text-gray-500">No Image Available</p>
+                    <p className="text-sm sm:text-base text-gray-500">{t('product_detail.no_image', 'No Image Available')}</p>
                   </div>
                 ) : (
                   <img
@@ -225,15 +215,15 @@ const ProductDetail = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => navigate('/shop')}
-                    className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors text-sm sm:text-base rounded-lg"
+                    className="flex items-center gap-2 px-4 py-3 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors text-base sm:text-base rounded-lg min-h-[44px] sm:min-h-0"
                   >
-                    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="hidden sm:inline">Back to Shop</span>
+                    <ArrowLeft className="w-8 h-5 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">{t('product_detail.back_to_shop', 'Back to Shop')}</span>
                   </button>
                   <button
                     onClick={handleShare}
                     className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    title="Share Product"
+                    title={t('product_detail.share_product', 'Share Product')}
                   >
                     <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
@@ -244,33 +234,33 @@ const ProductDetail = () => {
                         ? 'text-red-500 hover:bg-red-50' 
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
-                    title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    title={isWishlisted ? t('product_detail.remove_from_wishlist', 'Remove from Wishlist') : t('product_detail.add_to_wishlist', 'Add to Wishlist')}
                   >
                     <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                   </button>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-4">
                 <div className="flex items-center gap-2">
-                  <StarRating 
-                    rating={product?.star_rating || 0} 
-                    size="sm" 
+                  <StarRating
+                    rating={product?.star_rating || 0}
+                    size="sm"
                     showNumber={true}
                   />
                   <span className="text-sm sm:text-base text-gray-600">
                     ({Math.floor(Math.random() * 50) + 10} reviews)
                   </span>
                 </div>
-                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium shrink-0 ${
                   product?.stock_status === 'in_stock'
                     ? 'bg-green-100 text-green-700' 
                     : product?.stock_status === 'low_stock'
                     ? 'bg-yellow-100 text-yellow-700'
                     : 'bg-red-100 text-red-700'
                 }`}>
-                  {product?.stock_status === 'in_stock' ? 'In Stock' : 
-                   product?.stock_status === 'low_stock' ? 'Low Stock' : 
-                   'Out of Stock'}
+                  {product?.stock_status === 'in_stock' ? t('product_detail.in_stock', 'In Stock') : 
+                   product?.stock_status === 'low_stock' ? t('product_detail.low_stock', 'Low Stock') : 
+                   t('product_detail.out_of_stock', 'Out of Stock')}
                 </span>
               </div>
             </div>
@@ -307,72 +297,28 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Product Options */}
-            {(hasColors || hasSizes) && (
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Choose Options</h3>
-                
-                {hasColors && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                    <div className="flex gap-2 flex-wrap">
-                      {availableColors.map((color) => {
-                        const isHex = typeof color === 'string' && color.startsWith('#');
-                        const swatchColor = isHex ? color : color.toLowerCase();
-                        const isSelected = selectedOptions.color === color;
-                        return (
-                          <button
-                            key={color}
-                            onClick={() => setSelectedOptions(prev => ({ ...prev, color }))}
-                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 transition-all ${
-                              isSelected ? 'border-blue-500 scale-110' : 'border-gray-300 hover:border-gray-400'
-                            }`}
-                            style={{ backgroundColor: swatchColor }}
-                            title={color}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                
-                {hasSizes && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
-                    <div className="flex gap-2 flex-wrap">
-                      {availableSizes.map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedOptions(prev => ({ ...prev, size }))}
-                          className={`px-3 sm:px-4 py-2 rounded-lg border-2 font-medium transition-all text-sm sm:text-base ${
-                            selectedOptions.size === size
-                              ? 'border-blue-500 text-blue-600 bg-blue-50'
-                              : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {!selectionsComplete && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-red-600 font-medium flex items-center gap-2 text-sm sm:text-base">
-                      <AlertCircle className="w-4 h-4" />
-                      Please select all required options
-                    </p>
-                  </div>
-                )}
+            {/* What's Included - dynamic from product.details.included or product.included */}
+            {includedItems.length > 0 && (
+              <div className="bg-white rounded-lg border p-4 sm:p-6 shadow-sm">
+                <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{t('product_detail.included', "What's Included")}</h3>
+                <ul className="space-y-2 sm:space-y-3">
+                  {includedItems.map((item, index) => (
+                    <li key={index} className="flex items-center gap-3 text-gray-700">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      </span>
+                      <span className="text-sm sm:text-base">{typeof item === 'string' ? item : item?.label ?? String(item)}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
             {/* Description */}
             <div className="bg-white rounded-lg border p-4 sm:p-6 shadow-sm">
-              <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Product Description</h3>
+              <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{t('product_detail.product_description', 'Product Description')}</h3>
               <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                {product?.description || 'No description available.'}
+                {product?.description || t('product_detail.no_description', 'No description available.')}
               </p>
             </div>
           </div>

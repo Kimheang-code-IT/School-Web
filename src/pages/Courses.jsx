@@ -1,39 +1,52 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Grid, List, Clock, Users, BookOpen, X, Filter, Search, ChevronUp } from 'lucide-react';
+import { Grid, List, Clock, Users, BookOpen, X, Search, ChevronUp, SlidersHorizontal } from 'lucide-react';
 import LazyImage from '../components/LazyImage.jsx';
+import ImageLightbox from '../components/ImageLightbox.jsx';
 import StarRating from '../components/StarRating.jsx';
 import { useDebounce } from '../hooks/useDebounce.jsx';
 import { useUI } from '../context/UIContext.jsx';
-import coursesData from '../data/courses.json';
-import courseCategoriesData from '../data/courseCategories.json';
+import { useCourses } from '../hooks/useCourses.js';
+import { useCourseCategories } from '../hooks/useCourseCategories.js';
+import { useTranslation } from '../hooks/useTranslation.jsx';
 import '../styles/custom-scrollbar.css';
 
 const Courses = () => {
   const location = useLocation();
   const { isCartOpen } = useUI();
+  const { t } = useTranslation();
+  const { data: coursesData, loading: coursesLoading, error: coursesError } = useCourses();
+  const { data: courseCategoriesData } = useCourseCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('');
   const [selectedMode, setSelectedMode] = useState('');
   const [showDiscountedOnly, setShowDiscountedOnly] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [viewMode, setViewMode] = useState('grid');
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const lastScrollTopRef = useRef(0);
+  const mobileSearchInputRef = useRef(null);
 
   // Debounced search term for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Load data from JSON files
   const categories = useMemo(() => {
     return Array.isArray(courseCategoriesData)
       ? courseCategoriesData.filter(cat => cat.is_active !== false)
       : [];
-  }, []);
+  }, [courseCategoriesData]);
 
   const courses = useMemo(() => {
     return Array.isArray(coursesData) ? coursesData : [];
-  }, []);
+  }, [coursesData]);
+
+  const isLoading = coursesLoading;
+  const error = coursesError;
 
   const courseStats = useMemo(() => {
     return {
@@ -45,8 +58,6 @@ const Courses = () => {
     };
   }, [courses.length, categories.length]);
 
-  const isLoading = false;
-  const error = null;
 
   // Add body class for scroll control
   useEffect(() => {
@@ -56,21 +67,47 @@ const Courses = () => {
     };
   }, []);
 
-  // Handle scroll to show/hide scroll to top button
+  // Focus search input when mobile search dialog opens
   useEffect(() => {
+    if (isMobileSearchOpen && mobileSearchInputRef.current) {
+      mobileSearchInputRef.current.focus();
+    }
+  }, [isMobileSearchOpen]);
+
+  // Close mobile search on Escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setIsMobileSearchOpen(false);
+    };
+    if (isMobileSearchOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isMobileSearchOpen]);
+
+  // Handle scroll: scroll-to-top button + header hide on scroll down / show on scroll up (YouTube-style, like Shop)
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.main-scrollbar');
+    if (!scrollContainer) return;
+
     const handleScroll = () => {
-      const scrollContainer = document.querySelector('.main-scrollbar');
-      if (scrollContainer) {
-        const { scrollTop } = scrollContainer;
-        setShowScrollTop(scrollTop > 300);
+      const scrollTop = scrollContainer.scrollTop;
+      setShowScrollTop(scrollTop > 300);
+
+      const lastScrollTop = lastScrollTopRef.current;
+      const delta = scrollTop - lastScrollTop;
+      lastScrollTopRef.current = scrollTop;
+
+      if (scrollTop <= 20) {
+        setHeaderVisible(true);
+        return;
       }
+      if (delta > 8) setHeaderVisible(false);
+      else if (delta < -8) setHeaderVisible(true);
     };
 
-    const scrollContainer = document.querySelector('.main-scrollbar');
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScroll);
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
-    }
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Scroll to top function
@@ -125,9 +162,39 @@ const Courses = () => {
       filtered = filtered.filter(course => course && course.is_discounted === true);
     }
 
-    return filtered;
-  }, [courses, debouncedSearchTerm, selectedCategory, selectedLevel, selectedMode, showDiscountedOnly]);
+    // Apply price range filter
+    const minPrice = priceRange.min !== '' ? parseFloat(priceRange.min) : null;
+    const maxPrice = priceRange.max !== '' ? parseFloat(priceRange.max) : null;
+    if (minPrice != null && !Number.isNaN(minPrice)) {
+      filtered = filtered.filter(course => {
+        const p = course?.final_price ?? course?.price;
+        return typeof p === 'number' && p >= minPrice;
+      });
+    }
+    if (maxPrice != null && !Number.isNaN(maxPrice)) {
+      filtered = filtered.filter(course => {
+        const p = course?.final_price ?? course?.price;
+        return typeof p === 'number' && p <= maxPrice;
+      });
+    }
 
+    return filtered;
+  }, [courses, debouncedSearchTerm, selectedCategory, selectedLevel, selectedMode, showDiscountedOnly, priceRange]);
+
+  // Search suggestions for mobile dialog (match by name, description, level, instructor; limit 8)
+  const searchSuggestions = useMemo(() => {
+    const term = String(searchTerm || '').trim().toLowerCase();
+    if (!term || !Array.isArray(courses)) return [];
+    return courses
+      .filter((c) => {
+        const name = String(c.name || '').toLowerCase();
+        const desc = String(c.short_description || c.description || '').toLowerCase();
+        const level = String(c.level || '').toLowerCase();
+        const instructor = String(c.instructor || '').toLowerCase();
+        return name.includes(term) || desc.includes(term) || level.includes(term) || instructor.includes(term);
+      })
+      .slice(0, 8);
+  }, [courses, searchTerm]);
 
   // Format price function
   const formatPrice = (price) => {
@@ -154,7 +221,7 @@ const Courses = () => {
       <div className="h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading courses...</p>
+          <p className="text-gray-600">{t('courses.loading', 'Loading courses...')}</p>
         </div>
       </div>
     );
@@ -195,13 +262,13 @@ const Courses = () => {
           <div className="bg-white shadow-md h-full overflow-hidden border-r border-gray-200 flex flex-col">
         {/* Header */}
             <div className="mx-4 p-4 border-b border-gray-200">
-              <h3 className="text-sm font-bold text-gray-900 uppercase">ALL CATEGORIES</h3>
+              <h3 className="text-sm font-bold text-gray-900 uppercase">{t('courses.all_categories', 'All Categories')}</h3>
         </div>
 
             {/* Scrollable Categories */}
-            <div className="overflow-y-auto flex-1 sidebar-scrollbar scroll-container">
+            <div className="overflow-y-auto flex-1 sidebar-scrollbar scroll-container pb-4">
               <div className="p-4 space-y-2">
-                {/* All Courses Button - Always visible */}
+                {/* {t('courses.all_courses', 'All Courses')} Button - Always visible */}
                 <button
                   onClick={() => setSelectedCategory('')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all duration-200 text-sm font-medium flex items-center justify-between ${
@@ -210,7 +277,7 @@ const Courses = () => {
                       : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                   }`}
                 >
-                  <span className="uppercase">ALL COURSES</span>
+                  <span className="uppercase">{t('courses.all_courses', 'All Courses')}</span>
                   
                 </button>
 
@@ -234,7 +301,7 @@ const Courses = () => {
 
               {/* Level Filter */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">LEVEL</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.level', 'Level')}</h4>
                   <div className="space-y-1">
                     <button
                       onClick={() => setSelectedLevel('')}
@@ -244,7 +311,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      All Levels
+                      {t('courses.level_all', 'All Levels')}
                     </button>
                     <button
                       onClick={() => setSelectedLevel('beginner')}
@@ -254,7 +321,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      Beginner
+                      {t('courses.level_beginner', 'Beginner')}
                     </button>
                     <button
                       onClick={() => setSelectedLevel('intermediate')}
@@ -264,7 +331,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      Intermediate
+                      {t('courses.level_intermediate', 'Intermediate')}
                     </button>
                     <button
                       onClick={() => setSelectedLevel('advanced')}
@@ -274,14 +341,14 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      Advanced
+                      {t('courses.level_advanced', 'Advanced')}
                     </button>
                   </div>
               </div>
 
               {/* Mode Filter */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">DELIVERY MODE</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.delivery_mode', 'Delivery Mode')}</h4>
                   <div className="space-y-1">
                     <button
                       onClick={() => setSelectedMode('')}
@@ -291,7 +358,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      All Modes
+                      {t('courses.mode_all', 'All Modes')}
                     </button>
                     <button
                       onClick={() => setSelectedMode('online')}
@@ -301,7 +368,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      💻 Online
+                      💻 {t('courses.mode_online', 'Online')}
                     </button>
                     <button
                       onClick={() => setSelectedMode('physical')}
@@ -311,7 +378,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      🏢 Physical
+                      🏢 {t('courses.mode_physical', 'Physical')}
                     </button>
                     <button
                       onClick={() => setSelectedMode('both')}
@@ -321,14 +388,14 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      🔄 Both
+                      🔄 {t('courses.mode_both', 'Both')}
                     </button>
                   </div>
                 </div>
 
                 {/* Discount Filter */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">SPECIAL OFFERS</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.special_offers', 'Special Offers')}</h4>
                   <div className="space-y-1">
                     <button
                       onClick={() => setShowDiscountedOnly(false)}
@@ -338,7 +405,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-blue-100 hover:text-blue-900'
                       }`}
                     >
-                      All Courses
+                      {t('courses.all_courses', 'All Courses')}
                     </button>
                     <button
                       onClick={() => setShowDiscountedOnly(true)}
@@ -348,7 +415,7 @@ const Courses = () => {
                           : 'text-gray-600 hover:bg-red-100 hover:text-red-900'
                       }`}
                     >
-                      🔥 Discounted Only
+                      🔥 {t('courses.discounted_only', 'Discounted Only')}
                     </button>
                   </div>
                 </div>
@@ -361,253 +428,330 @@ const Courses = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           
-          {/* Header - Sticky */}
-          <div className="bg-white shadow-md p-3 lg:p-2 mb-3 sticky top-0 z-20 flex-shrink-0">
-            <div className="flex items-center justify-between">
-
-              {/* Page Title */}
-              <div className="flex-1 text-center lg:text-left">
-                <div className="flex items-center justify-center lg:justify-start gap-2">
-                  <h1 className="text-lg lg:text-xl font-bold text-gray-900">
-                    {selectedCategory 
-                      ? categories.find(cat => cat.slug === selectedCategory)?.name || 'Courses'
-                      : 'All Courses'
-                    }
-                  </h1>
-                </div>
-                <span className="text-xs lg:text-sm text-gray-500">
-                  {filteredCourses.length} of {courses.length} courses
-                  {debouncedSearchTerm && ` (filtered by "${debouncedSearchTerm}")`}
-                  {showDiscountedOnly && ` (discounted only)`}
-                  {courseStats && courseStats.total_courses > 0 && (
-                    <span className="ml-2 text-blue-600">
-                      • {courseStats.total_courses} total courses
-                    </span>
-                  )}
-                  
-                </span>
-                {/* Error message display */}
-                {error && (
-                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-xs text-red-600">
-                      {error}
-                    </p>
+          {/* Sticky Header - hides on scroll down, shows on scroll up; wrapper collapses so courses move to top (like Shop) */}
+          <div
+            className={`sticky top-0 z-20 flex-shrink-0 overflow-hidden transition-all duration-300 ease-out ${
+              headerVisible ? 'max-h-40 opacity-100 mb-3' : 'max-h-0 opacity-0 mb-0'
+            }`}
+          >
+            <div className="bg-white shadow-md px-3 py-4 lg:py-2">
+              <div className="flex items-center justify-between">
+                {/* Page Title - left on mobile and desktop */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-start gap-2">
+                    <h1 className="text-lg lg:text-xl font-bold text-gray-900 truncate">
+                      {selectedCategory 
+                        ? categories.find(cat => cat.slug === selectedCategory)?.name || t('courses.title', 'Courses')
+                        : t('courses.all_courses', 'All Courses')
+                      }
+                    </h1>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Search Input */}
-              <div className="flex-1 max-w-md mx-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Search courses..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                {/* Desktop: Search Input | Mobile: Search icon opens dialog (like Shop) */}
+                <div className="flex-1 max-w-md mx-4 hidden lg:block">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder={t('courses.search_placeholder', 'Search courses...')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mobile: Search + Filter to the right; Filter opens left drawer */}
+                <div className="lg:hidden flex items-center gap-0.5">
+                  <button
+                    onClick={() => setIsMobileSearchOpen(true)}
+                    className="p-2 text-gray-600 hover:text-gray-900"
+                    title={t('courses.search_courses_aria', 'Search courses')}
+                    aria-label={t('courses.search_courses_aria', 'Search courses')}
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setIsFilterDrawerOpen(true)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      selectedCategory || selectedLevel || selectedMode || showDiscountedOnly || priceRange.min || priceRange.max
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    title={t('courses.filters', 'Filter')}
+                    aria-label={t('shop.open_filters_aria', 'Open filters')}
+                  >
+                    <SlidersHorizontal className="w-5 h-5" />
+                  </button>
+               
+                </div>
+
+                {/* View Mode Toggle - Desktop */}
+                <div className="hidden lg:flex items-center space-x-1">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-lg transition-colors ${
+                      viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                  >
+                    <Grid className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-lg transition-colors ${
+                      viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
-
-              {/* Mobile Filter Button */}
-              <button
-                onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-                className="lg:hidden p-2 text-gray-600 hover:text-gray-900 mobile-filter-btn"
-                title="Filter courses"
-              >
-                <Filter className="w-5 h-5" />
-              </button>
-
-              {/* View Mode Toggle */}
-              <div className="hidden lg:flex items-center space-x-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-blue-100 text-blue-600' 
-                      : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-blue-100 text-blue-600' 
-                      : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </div>
-
             </div>
           </div>
 
-          {/* Mobile Filters Overlay */}
-          {isMobileFiltersOpen && (
-            <div className="lg:hidden mobile-filter-overlay">
-              <div className="mobile-filter-content">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Filters</h3>
+          {/* Mobile: Left Filter Drawer (category, min/max price, level, mode, discount) */}
+          {isFilterDrawerOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50"
+              aria-modal="true"
+              role="dialog"
+              aria-label={t('courses.filters', 'Filters')}
+            >
+              <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setIsFilterDrawerOpen(false)}
+              />
+              <div
+                className="absolute top-0 left-0 bottom-0 h-full w-[min(320px,85vw)] bg-white shadow-xl flex flex-col overflow-hidden"
+                style={{ animation: 'slideInLeft 0.25s ease-out' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                  <h3 className="text-lg font-bold text-gray-900">{t('courses.filters', 'Filters')}</h3>
                   <button
-                    onClick={() => setIsMobileFiltersOpen(false)}
-                    className="p-2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="p-2 text-gray-500 hover:text-gray-700 rounded-lg"
+                    aria-label={t('shop.close_filters_aria', 'Close filters')}
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
-                {/* Mobile Filter Content */}
-                <div className="p-4 space-y-6">
-                  {/* Categories */}
+                <div
+                  className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 p-4 space-y-6"
+                  style={{
+                    WebkitOverflowScrolling: 'touch',
+                    overscrollBehavior: 'contain',
+                    touchAction: 'pan-y'
+                  }}
+                >
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Categories</h4>
-                    <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.category', 'Category')}</h4>
+                    <div className="space-y-1">
                       <button
-                        onClick={() => {
-                          setSelectedCategory('');
-                          setIsMobileFiltersOpen(false);
-                        }}
-                        className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                          selectedCategory === '' 
-                            ? 'bg-blue-100 text-blue-900 border-2 border-blue-200' 
-                            : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                        onClick={() => setSelectedCategory('')}
+                        className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                          selectedCategory === '' ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                       >
-                        All Courses
+                        {t('courses.all_courses', 'All Courses')}
                       </button>
-                      {categories && categories.length > 0 && categories.map((category) => (
+                      {categories.map((cat) => (
                         <button
-                          key={category.id}
-                          onClick={() => {
-                            setSelectedCategory(category.slug);
-                            setIsMobileFiltersOpen(false);
-                          }}
-                          className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                            selectedCategory === category.slug 
-                              ? 'bg-blue-100 text-blue-900 border-2 border-blue-200' 
-                              : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.slug)}
+                          className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                            selectedCategory === cat.slug ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                           }`}
                         >
-                          {category.name}
+                          {cat.name}
                         </button>
                       ))}
                     </div>
                   </div>
-                  
-                  {/* Level Filter */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Course Level</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.price_range', 'Price Range')}</h4>
+                    <div className="space-y-2">
+                      <input
+                        type="number"
+                        placeholder={t('courses.min_price', 'Min ($)')}
+                        value={priceRange.min}
+                        onChange={(e) => setPriceRange((prev) => ({ ...prev, min: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                      <input
+                        type="number"
+                        placeholder={t('courses.max_price', 'Max ($)')}
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange((prev) => ({ ...prev, max: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.level', 'Level')}</h4>
+                    <div className="space-y-1">
                       {['', 'beginner', 'intermediate', 'advanced'].map((level) => (
                         <button
-                          key={level}
-                          onClick={() => {
-                            setSelectedLevel(level);
-                            setIsMobileFiltersOpen(false);
-                          }}
-                          className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                            selectedLevel === level 
-                              ? 'bg-blue-100 text-blue-900 border-2 border-blue-200' 
-                              : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                          key={level || 'all'}
+                          onClick={() => setSelectedLevel(level)}
+                          className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                            selectedLevel === level ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                           }`}
                         >
-                          {level === '' ? 'All Levels' : level.charAt(0).toUpperCase() + level.slice(1)}
+                          {level === '' ? t('courses.level_all', 'All Levels') : (level === 'beginner' ? t('courses.level_beginner', 'Beginner') : level === 'intermediate' ? t('courses.level_intermediate', 'Intermediate') : t('courses.level_advanced', 'Advanced'))}
                         </button>
                       ))}
-              </div>
-            </div>
-
-                  {/* Mode Filter */}
+                    </div>
+                  </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Delivery Mode</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['', 'online', 'physical', 'both'].map((mode) => (
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.delivery_mode', 'Delivery Mode')}</h4>
+                    <div className="space-y-1">
+                      {[
+                        { value: '', label: t('courses.mode_all', 'All Modes') },
+                        { value: 'online', label: `💻 ${t('courses.mode_online', 'Online')}` },
+                        { value: 'physical', label: `🏢 ${t('courses.mode_physical', 'Physical')}` },
+                        { value: 'both', label: `🔄 ${t('courses.mode_both', 'Both')}` }
+                      ].map(({ value, label }) => (
                         <button
-                          key={mode}
-                          onClick={() => {
-                            setSelectedMode(mode);
-                            setIsMobileFiltersOpen(false);
-                          }}
-                          className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                            selectedMode === mode 
-                              ? 'bg-blue-100 text-blue-900 border-2 border-blue-200' 
-                              : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                          key={value || 'all'}
+                          onClick={() => setSelectedMode(value)}
+                          className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                            selectedMode === value ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                           }`}
                         >
-                          {mode === '' ? 'All Modes' : `${getModeIcon(mode)} ${mode.charAt(0).toUpperCase() + mode.slice(1)}`}
+                          {label}
                         </button>
                       ))}
                     </div>
                   </div>
-
-                  {/* Discount Filter */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Special Offers</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('courses.special_offers', 'Special Offers')}</h4>
+                    <div className="space-y-1">
                       <button
-                        onClick={() => {
-                          setShowDiscountedOnly(false);
-                          setIsMobileFiltersOpen(false);
-                        }}
-                        className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                          !showDiscountedOnly 
-                            ? 'bg-blue-100 text-blue-900 border-2 border-blue-200' 
-                            : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                        onClick={() => setShowDiscountedOnly(false)}
+                        className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                          !showDiscountedOnly ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                       >
-                        All Courses
+                        {t('courses.all_courses', 'All Courses')}
                       </button>
                       <button
-                        onClick={() => {
-                          setShowDiscountedOnly(true);
-                          setIsMobileFiltersOpen(false);
-                        }}
-                        className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                          showDiscountedOnly 
-                            ? 'bg-red-100 text-red-900 border-2 border-red-200' 
-                            : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                        onClick={() => setShowDiscountedOnly(true)}
+                        className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                          showDiscountedOnly ? 'bg-red-100 text-red-900' : 'text-gray-600 hover:bg-red-100 hover:text-red-900'
                         }`}
                       >
-                        🔥 Discounted Only
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Mobile Filter Actions */}
-                  <div className="pt-6 border-t border-gray-200">
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => {
-                          setSelectedCategory('');
-                          setSelectedLevel('');
-                          setSelectedMode('');
-                          setShowDiscountedOnly(false);
-                        }}
-                        className="flex-1 px-4 py-3 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                      >
-                        Clear All
-                      </button>
-                      <button
-                        onClick={() => setIsMobileFiltersOpen(false)}
-                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                      >
-                        Apply Filters
+                        🔥 {t('courses.discounted_only', 'Discounted Only')}
                       </button>
                     </div>
                   </div>
                 </div>
+                <div className="p-4 border-t border-gray-200 flex-shrink-0">
+                  <button
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    {t('courses.done', 'Done')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Search Dialog (like Shop) with suggestions */}
+          {isMobileSearchOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsMobileSearchOpen(false)}
+              aria-modal="true"
+              role="dialog"
+              aria-label={t('courses.search_courses_aria', 'Search courses')}
+            >
+              <div
+                className="absolute top-0 left-0 right-0 max-h-[85vh] flex flex-col bg-white  overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 pb-3 flex items-center gap-2 flex-shrink-0">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      ref={mobileSearchInputRef}
+                      type="text"
+                      placeholder={t('courses.search_placeholder', 'Search courses...')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-10 py-3 border border-gray-300  text-base focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                    {searchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                        aria-label={t('courses.clear_search_aria', 'Clear search')}
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileSearchOpen(false)}
+                    className="p-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium"
+                    aria-label={t('courses.close_search_aria', 'Close search')}
+                  >
+                    {t('common.cancel', 'Cancel')}
+                  </button>
+                </div>
+                {searchTerm.trim() && (
+                  <div className="border-t border-gray-100 overflow-y-auto flex-1 min-h-0">
+                    {searchSuggestions.length > 0 ? (
+                      <ul className="py-2" role="listbox">
+                        {searchSuggestions.map((course) => (
+                          <li key={course.id}>
+                            <Link
+                              to={`/courses/${course.slug}`}
+                              onClick={() => setIsMobileSearchOpen(false)}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                              role="option"
+                            >
+                              {(course.cover_image || course.image_url) ? (
+                                <img
+                                  src={course.cover_image || course.image_url}
+                                  alt=""
+                                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-gray-100"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                  <BookOpen className="w-6 h-6 text-primary-600" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-gray-900 truncate">{course.name}</div>
+                                <div className="text-sm text-primary-600">
+                                  {formatPrice(course.final_price || course.price)}
+                                  {course.instructor && ` · ${course.instructor}`}
+                                </div>
+                              </div>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                        {t('courses.no_courses_for', 'No courses found for "{search}"').replace('{search}', searchTerm.trim())}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -637,25 +781,46 @@ const Courses = () => {
               }`}>
                 {Array.isArray(filteredCourses) && filteredCourses.map((course) => (
                   <div key={course.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 group relative">
-                    {/* Discount Badge */}
-                    {course.is_discounted && (
-                      <div className="absolute top-2 left-2 z-10">
-                        <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                          {course.effective_discount_percentage ? `-${Math.round(course.effective_discount_percentage)}% OFF` : 'SALE'}
-                        </span>
-                      </div>
-                    )}
+                    {/* Discount Badge - show "-X% OFF" like shop cards */}
+                    {course.is_discounted && (() => {
+                      const comparePrice = course.compare_price ?? course.price;
+                      const finalPrice = course.final_price ?? course.price;
+                      const percent = course.effective_discount_percentage != null
+                        ? Math.round(course.effective_discount_percentage)
+                        : (comparePrice > 0 && finalPrice < comparePrice)
+                          ? Math.round(((comparePrice - finalPrice) / comparePrice) * 100)
+                          : null;
+                      return percent != null && percent > 0 ? (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">
+                            {t('courses.percent_off', '-{percent}% OFF').replace('{percent}', percent)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">
+                            {t('courses.discount_badge', 'DISCOUNT')}
+                          </span>
+                        </div>
+                      );
+                    })()}
                     
                     <div className="aspect-w-16 aspect-h-9 mb-4">
-                      <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+                      <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer group relative">
                         {course.cover_image ? (
                           <LazyImage
                             src={course.cover_image}
                             alt={course.name}
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                            onClick={() => setSelectedImage({ url: course.cover_image, name: course.name })}
                           />
                         ) : (
                           <BookOpen className="w-16 h-16 text-blue-600" />
+                        )}
+                        {course.cover_image && (
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center pointer-events-none">
+                            <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg">{t('courses.click_to_enlarge', 'Click to enlarge')}</span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -669,7 +834,7 @@ const Courses = () => {
                           </Link>
                         </h3>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(course.level)} ml-2 flex-shrink-0`}>
-                          {course.level || 'Unknown'}
+                          {course.level || t('courses.unknown', 'Unknown')}
                         </span>
                       </div>
 
@@ -682,13 +847,13 @@ const Courses = () => {
                             showNumber={true}
                           />
                           <span className="text-sm text-gray-600">
-                            ({course.review_count || 0} reviews)
+                            ({course.review_count || 0} {t('product_detail.reviews', 'reviews')})
                           </span>
                         </div>
                       </div>
                       
                       <p className="text-gray-600 text-sm line-clamp-2">
-                        {course.short_description || course.description || 'No description available'}
+                        {course.short_description || course.description || t('courses.no_description', 'No description available')}
                       </p>
                       
                       <div className="flex items-center justify-between text-sm text-gray-600">
@@ -698,7 +863,7 @@ const Courses = () => {
                         </div>
                         <div className="flex items-center space-x-1">
                           <span>{getModeIcon(course.mode)}</span>
-                          <span className="capitalize">{course.mode || 'Unknown'}</span>
+                          <span className="capitalize">{course.mode || t('courses.unknown', 'Unknown')}</span>
                         </div>
                       </div>
                       
@@ -715,12 +880,12 @@ const Courses = () => {
                               )}
                               {course.savings_amount && course.savings_amount > 0 && (
                                 <div className="text-xs text-green-600 font-medium">
-                                  Save {formatPrice(course.savings_amount)}
+                                  {t('shop.save', 'Save')} {formatPrice(course.savings_amount)}
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <div className="text-sm text-gray-400">Regular Price</div>
+                            <div className="text-sm text-gray-400">{t('courses.regular_price', 'Regular Price')}</div>
                           )}
                         </div>
                         
@@ -748,7 +913,7 @@ const Courses = () => {
                           to={`/courses/${course.slug}`}
                           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                         >
-                          View Details
+                          {t('courses.view_details', 'View Details')}
                         </Link>
                       </div>
                     </div>
@@ -763,12 +928,12 @@ const Courses = () => {
                   <BookOpen className="w-20 h-20 mx-auto opacity-50" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {debouncedSearchTerm ? `No courses found for "${debouncedSearchTerm}"` : 'No courses available'}
+                  {debouncedSearchTerm ? t('courses.no_courses_for', 'No courses found for "{search}"').replace('{search}', debouncedSearchTerm) : t('courses.no_courses', 'No courses available')}
                 </h3>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   {debouncedSearchTerm 
-                    ? `We couldn't find any courses matching your search. Try different keywords, browse by category, or check our course catalog.`
-                    : 'No courses match your current filter criteria. Try adjusting your filters or browse all courses.'
+                    ? t('courses.search_no_results_message', "We couldn't find any courses matching your search. Try different keywords, browse by category, or check our course catalog.")
+                    : t('courses.no_courses_match', 'No courses match your current filter criteria.')
                   }
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -777,27 +942,23 @@ const Courses = () => {
                       onClick={() => setSearchTerm('')}
                       className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                     >
-                      Clear Search
+                      {t('courses.clear_search', 'Clear Search')}
                     </button>
                   )}
-                  {(selectedCategory || selectedLevel || selectedMode || showDiscountedOnly) && (
+                  {(selectedCategory || selectedLevel || selectedMode || showDiscountedOnly || priceRange.min || priceRange.max) && (
                     <button
                       onClick={() => {
                         setSelectedCategory('');
                         setSelectedLevel('');
                         setSelectedMode('');
                         setShowDiscountedOnly(false);
+                        setPriceRange({ min: '', max: '' });
                         setSearchTerm('');
                       }}
                       className="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                     >
-                      Clear All Filters
+                      {t('courses.clear_filters', 'Clear All Filters')}
                     </button>
-                  )}
-                  {error && (
-                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-600">{error}</p>
-                    </div>
                   )}
                 </div>
               </div>
@@ -806,13 +967,21 @@ const Courses = () => {
         </div>
       </div>
 
+      {/* Full-screen image with zoom */}
+      <ImageLightbox
+        isOpen={selectedImage !== null}
+        onClose={() => setSelectedImage(null)}
+        imageUrl={selectedImage?.url}
+        title={selectedImage?.name}
+      />
+
       {/* Scroll to Top Button - Hide when cart is open */}
       {showScrollTop && !isCartOpen && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-24 right-8 w-12 h-12 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50"
-          title="Scroll to top"
-          aria-label="Scroll to top"
+          className="fixed bottom-5 right-5 w-12 h-12 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50"
+          title={t('common.scroll_to_top', 'Scroll to top')}
+          aria-label={t('common.scroll_to_top', 'Scroll to top')}
         >
           <ChevronUp className="w-6 h-6" />
         </button>

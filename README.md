@@ -6,7 +6,7 @@ A modern, responsive web application for a school/learning platform built with R
 
 - 📚 **Course Management** - Browse and enroll in courses
 - 🛍️ **E-commerce Shop** - Product catalog with filtering and sorting
-- 📝 **Registration System** - Student enrollment with Google Sheets integration
+- 📝 **Registration System** - Student enrollment with confirmation and invoice
 - 🎓 **Academic Programs** - Display available academic programs
 - 📰 **News & Events** - Latest news and events section
 - 🤝 **Partners** - Value partners showcase
@@ -23,7 +23,6 @@ A modern, responsive web application for a school/learning platform built with R
 - **Lucide React** - Icons
 - **React Hot Toast** - Notifications
 - **HTML2Canvas** - Screenshot functionality
-- **Google Apps Script** - Backend integration for registration
 
 ## Getting Started
 
@@ -63,19 +62,9 @@ Frontend/
 │   ├── context/      # React context providers
 │   ├── data/         # JSON data files
 │   ├── hooks/        # Custom React hooks
-│   ├── utils/        # Utility functions
-│   └── config/       # Configuration files
+│   └── utils/        # Utility functions
 └── package.json
 ```
-
-## Configuration
-
-### Google Sheets Integration
-
-The registration system integrates with Google Sheets. See `GOOGLE_SHEETS_SETUP.md` for detailed setup instructions.
-
-1. Deploy the Google Apps Script from `google-apps-script-code-secure.gs`
-2. Update `src/config/googleSheets.js` with your Web App URL and security token
 
 ## Available Scripts
 
@@ -88,8 +77,7 @@ The registration system integrates with Google Sheets. See `GOOGLE_SHEETS_SETUP.
 
 ### Registration System
 - Secure form submission with validation
-- Google Sheets integration for data storage
-- Automatic invoice generation
+- Enrollment confirmation and invoice generation
 - Print and screenshot functionality
 
 ### Course Management
@@ -106,7 +94,6 @@ The registration system integrates with Google Sheets. See `GOOGLE_SHEETS_SETUP.
 ## Security
 
 - Content Security Policy (CSP) configured
-- Secure token-based authentication for Google Sheets
 - Input validation and sanitization
 
 ## Contributing

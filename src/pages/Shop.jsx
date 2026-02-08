@@ -1,47 +1,41 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  X, Filter, Grid, List, Package, Search, Eye, ChevronUp
-} from 'lucide-react';
+import { X, Grid, List, Package, Search, Eye, ChevronUp, SlidersHorizontal } from 'lucide-react';
 import LazyImage from '../components/LazyImage.jsx';
+import ImageLightbox from '../components/ImageLightbox.jsx';
 import StarRating from '../components/StarRating.jsx';
 import { useDebounce } from '../hooks/useDebounce.jsx';
 import { useUI } from '../context/UIContext.jsx';
 import { formatPrice } from '../utils/priceUtils.jsx';
-import productsData from '../data/products.json';
-import productCategoriesData from '../data/productCategories.json';
+import { useProducts } from '../hooks/useProducts.js';
+import { useProductCategories } from '../hooks/useProductCategories.js';
+import { useTranslation } from '../hooks/useTranslation.jsx';
 import '../styles/custom-scrollbar.css';
-// Performance optimizations
 
 const Shop = () => {
   const navigate = useNavigate();
   const { isCartOpen } = useUI();
+  const { t } = useTranslation();
+  const { data: products = [], loading: productsLoading, error: productsError } = useProducts();
+  const { data: categories = [] } = useProductCategories();
 
-  // State management
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sortBy, setSortBy] = useState('');
-  const [productCondition, setProductCondition] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const mobileSearchInputRef = useRef(null);
+  const lastScrollTopRef = useRef(0);
 
-  // Debounced search term for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Load data from JSON files
-  const categories = useMemo(() => {
-    return Array.isArray(productCategoriesData) ? productCategoriesData : [];
-  }, []);
-
-  const products = useMemo(() => {
-    return Array.isArray(productsData) ? productsData : [];
-  }, []);
-
-  const isLoading = false;
-  const error = null;
+  const isLoading = productsLoading;
+  const error = productsError;
 
   // Add body class for scroll control
   useEffect(() => {
@@ -51,21 +45,47 @@ const Shop = () => {
     };
   }, []);
 
-  // Handle scroll to show/hide scroll to top button
+  // Focus search input when mobile search dialog opens
   useEffect(() => {
+    if (isMobileSearchOpen && mobileSearchInputRef.current) {
+      mobileSearchInputRef.current.focus();
+    }
+  }, [isMobileSearchOpen]);
+
+  // Close mobile search on Escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setIsMobileSearchOpen(false);
+    };
+    if (isMobileSearchOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isMobileSearchOpen]);
+
+  // Handle scroll: scroll-to-top button + header hide on scroll down / show on scroll up (YouTube-style)
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.main-scrollbar');
+    if (!scrollContainer) return;
+
     const handleScroll = () => {
-      const scrollContainer = document.querySelector('.main-scrollbar');
-      if (scrollContainer) {
-        const { scrollTop } = scrollContainer;
-        setShowScrollTop(scrollTop > 300);
+      const scrollTop = scrollContainer.scrollTop;
+      setShowScrollTop(scrollTop > 300);
+
+      const lastScrollTop = lastScrollTopRef.current;
+      const delta = scrollTop - lastScrollTop;
+      lastScrollTopRef.current = scrollTop;
+
+      if (scrollTop <= 20) {
+        setHeaderVisible(true);
+        return;
       }
+      if (delta > 8) setHeaderVisible(false);
+      else if (delta < -8) setHeaderVisible(true);
     };
 
-    const scrollContainer = document.querySelector('.main-scrollbar');
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScroll);
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
-    }
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Scroll to top function
@@ -153,81 +173,23 @@ const Shop = () => {
     return filtered;
   }, [products, debouncedSearchTerm, selectedCategory, priceRange, sortBy, categories]);
 
+  // Search suggestions for mobile dialog (match by name/title/description, limit 8)
+  const searchSuggestions = useMemo(() => {
+    const term = String(searchTerm || '').trim().toLowerCase();
+    if (!term || !Array.isArray(products)) return [];
+    return products
+      .filter((p) => {
+        const name = String(p.name || p.title || '').toLowerCase();
+        const desc = String(p.description || p.short_description || '').toLowerCase();
+        return name.includes(term) || desc.includes(term);
+      })
+      .slice(0, 8);
+  }, [products, searchTerm]);
 
 
 
 
 
-  // Image Modal Component
-  const ImageModal = ({ isOpen, onClose, imageUrl, productName }) => {
-    const [imageLoading, setImageLoading] = useState(true);
-
-    // Handle escape key
-    useEffect(() => {
-      const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      };
-
-      if (isOpen) {
-        document.addEventListener('keydown', handleEscape);
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        setImageLoading(true); // Reset loading state when modal opens
-      }
-
-      return () => {
-        document.removeEventListener('keydown', handleEscape);
-        document.body.style.overflow = 'unset';
-      };
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
-
-    return (
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 animate-fadeIn"
-        onClick={onClose}
-      >
-        <div 
-          className="relative max-w-6xl max-h-[90vh] w-full mx-4 animate-scaleIn"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10 bg-black bg-opacity-50 rounded-full p-2 transition-all duration-200 hover:bg-opacity-70"
-            aria-label="Close image modal"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <div className="bg-white rounded-lg overflow-hidden shadow-2xl">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">{productName}</h3>
-            </div>
-            <div className="p-4 relative">
-              {imageLoading && (
-                <div className="flex items-center justify-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
-              )}
-          <img
-            src={imageUrl}
-            alt={productName}
-                className={`max-w-full max-h-[70vh] object-contain mx-auto rounded-lg transition-opacity duration-300 ${
-                  imageLoading ? 'opacity-0 absolute' : 'opacity-100'
-                }`}
-                onLoad={() => setImageLoading(false)}
-                onError={(e) => {
-                  e.target.src = '/placeholder-product.jpg';
-                  setImageLoading(false);
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // Don't render until we have proper data structure
   if (isLoading && !Array.isArray(categories)) {
@@ -235,7 +197,7 @@ const Shop = () => {
       <div className="h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading shop...</p>
+          <p className="text-gray-600">{t('shop.loading', 'Loading shop...')}</p>
         </div>
       </div>
     );
@@ -249,7 +211,7 @@ const Shop = () => {
           <div className="bg-white shadow-md h-full overflow-hidden border-r border-gray-200 flex flex-col">
         {/* Header */}
             <div className="mx-4 p-4 border-b border-gray-200">
-              <h3 className="text-[16px] font-bold text-gray-900 uppercase">ALL CATEGORIES</h3>
+              <h3 className="text-[16px] font-bold text-gray-900 uppercase">{t('shop.all_categories', 'All Categories')}</h3>
         </div>
 
             {/* Scrollable Filters */}
@@ -257,9 +219,9 @@ const Shop = () => {
               <div className="p-4 space-y-6">
                 {/* Categories Section */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">Categories</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('shop.category', 'Categories')}</h4>
                 <div className="space-y-1">
-                    {/* All Products Button */}
+                    {/* {t('shop.all_products', 'All Products')} Button */}
                         <button
                           onClick={() => setSelectedCategory('')}
                       className={`w-full text-left py-2 px-3 rounded-lg transition-all duration-200 text-sm font-medium ${
@@ -268,7 +230,7 @@ const Shop = () => {
                           : 'text-gray-600 hover:bg-gray-100'
                           }`}
                         >
-                      All Products
+                      {t('shop.all_products', 'All Products')}
                         </button>
                     {Array.isArray(categories) && categories.map((category) => (
                       <button
@@ -288,18 +250,18 @@ const Shop = () => {
 
                 {/* Price Range Section */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">Price Range</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('shop.price_range', 'Price Range')}</h4>
                   <div className="space-y-2">
                     <input
                       type="number"
-                      placeholder="Min Price ($)"
+                      placeholder={t('shop.min_price', 'Min ($)')}
                       value={priceRange.min}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     />
                     <input
                       type="number"
-                      placeholder="Max Price ($)"
+                      placeholder={t('shop.max_price', 'Max ($)')}
                       value={priceRange.max}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -309,15 +271,15 @@ const Shop = () => {
 
                 {/* Sort By Section */}
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">Sort By</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('shop.sort_by', 'Sort By')}</h4>
                   <div className="space-y-1">
                     {[
-                      { value: '', label: 'Default' },
-                      { value: 'price_low', label: 'Price: Low to High' },
-                      { value: 'price_high', label: 'Price: High to Low' },
-                      { value: 'newest', label: 'Newest First' },
-                      { value: 'oldest', label: 'Oldest First' },
-                      { value: 'name', label: 'Name A-Z' }
+                      { value: '', label: t('shop.sort_default', 'Default') },
+                      { value: 'price_low', label: t('shop.price_low', 'Price: Low to High') },
+                      { value: 'price_high', label: t('shop.price_high', 'Price: High to Low') },
+                      { value: 'newest', label: t('shop.newest', 'Newest First') },
+                      { value: 'oldest', label: t('shop.oldest', 'Oldest First') },
+                      { value: 'name', label: t('shop.name_az', 'Name A-Z') }
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -341,67 +303,111 @@ const Shop = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           
-          {/* Mobile Header - Sticky */}
-          <div className="bg-white shadow-md p-3 lg:p-2 mb-3 sticky top-0 z-20 flex-shrink-0">
+          {/* Sticky Header - hides on scroll down, shows on scroll up; wrapper collapses so products move to top */}
+          <div
+            className={`sticky top-0 z-20 flex-shrink-0 overflow-hidden transition-all duration-300 ease-out ${
+              headerVisible ? 'max-h-40 opacity-100 mb-3' : 'max-h-0 opacity-0 mb-0'
+            }`}
+          >
+            <div className="bg-white shadow-md px-3 py-4 lg:py-2">
             <div className="flex items-center justify-between">
 
-              {/* Page Title */}
-              <div className="flex-1 text-center lg:text-left">
-                <div className="flex items-center justify-center lg:justify-start gap-2">
-                <h1 className="text-lg lg:text-xl font-bold text-gray-900">
+              {/* Page Title - left on mobile and desktop */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-start gap-2">
+                <h1 className="text-lg lg:text-xl font-bold text-gray-900 truncate">
                   {selectedCategory 
-                      ? categories.find(cat => cat.slug === selectedCategory)?.name || 'Products'
-                      : 'All Products'
+                      ? categories.find(cat => cat.slug === selectedCategory)?.name || t('shop.title', 'Products')
+                      : t('shop.all_products', 'All Products')
                   }
                 </h1>
                 </div>
-                <span className="text-xs lg:text-sm text-gray-500">
-                  {filteredProducts.length} of {products.length} products
-                  {debouncedSearchTerm && ` (filtered by "${debouncedSearchTerm}")`}
-                  
-                  </span>
-                {/* Error message display */}
-                {error && (
-                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-xs text-red-600">
-                      {error}
-                    </p>
-                  </div>
-                )}
               </div>
 
-              {/* Search Input */}
-              <div className="flex-1 max-w-md mx-4">
+              {/* Desktop: Search Input with suggestions dropdown | Mobile: Search icon opens dialog */}
+              <div className="flex-1 max-w-md mx-4 hidden lg:block relative">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    placeholder="Search products..."
+                    placeholder={t('shop.search_placeholder', 'Search products...')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   {searchTerm && (
                     <button
+                      type="button"
                       onClick={() => setSearchTerm('')}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      aria-label={t('shop.clear_search_aria', 'Clear search')}
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
+                {/* Desktop search suggestions dropdown */}
+                {searchTerm.trim() && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto z-30">
+                    {searchSuggestions.length > 0 ? (
+                      <ul className="py-1" role="listbox">
+                        {searchSuggestions.map((product) => (
+                          <li key={product.id}>
+                            <Link
+                              to={`/products/${product.slug}`}
+                              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                              role="option"
+                            >
+                              {product.image_url ? (
+                                <img src={product.image_url} alt="" className="w-10 h-10 rounded-md object-cover flex-shrink-0 bg-gray-100" />
+                              ) : (
+                                <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                  <Package className="w-5 h-5 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-gray-900 truncate text-sm">{product.name || product.title}</div>
+                                <div className="text-xs text-primary-600">{formatPrice(product.final_price || product.price)}</div>
+                              </div>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="px-4 py-4 text-center text-gray-500 text-sm">
+                        {t('shop.no_products_for', 'No products found for "{search}"').replace('{search}', searchTerm.trim())}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Mobile Filter Button */}
-              <button
-                onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-                className="lg:hidden p-2 text-gray-600 hover:text-gray-900 mobile-filter-btn"
-                title="Filter products"
-              >
-                <Filter className="w-5 h-5" />
-              </button>
+              {/* Mobile: Search + Filter icons to the right; Filter opens left drawer */}
+              <div className="lg:hidden flex items-center gap-0.5">
+                <button
+                  onClick={() => setIsMobileSearchOpen(true)}
+                  className="p-2 text-gray-600 hover:text-gray-900"
+                  title={t('shop.search_products_aria', 'Search products')}
+                  aria-label={t('shop.search_products_aria', 'Search products')}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setIsFilterDrawerOpen(true)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    selectedCategory || priceRange.min || priceRange.max || sortBy
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title={t('shop.filters', 'Filter')}
+                  aria-label={t('shop.open_filters_aria', 'Open filters')}
+                >
+                  <SlidersHorizontal className="w-5 h-5" />
+                </button>
+                
+              </div>
 
-              {/* View Mode Toggle */}
+              {/* View Mode Toggle - Desktop */}
               <div className="hidden lg:flex items-center space-x-1">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -426,185 +432,206 @@ const Shop = () => {
               </div>
 
             </div>
+            </div>
           </div>
 
-          {/* Mobile Filters Overlay */}
-          {isMobileFiltersOpen && (
-            <div className="lg:hidden mobile-filter-overlay">
-              <div className="mobile-filter-content">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Filters</h3>
+          {/* Mobile: Left Filter Drawer (category, min/max price, sort) */}
+          {isFilterDrawerOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50"
+              aria-modal="true"
+              role="dialog"
+              aria-label={t('shop.filters', 'Filters')}
+            >
+              <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setIsFilterDrawerOpen(false)}
+              />
+              <div
+                className="absolute top-0 left-0 bottom-0 h-full w-[min(320px,85vw)] bg-white shadow-xl flex flex-col overflow-hidden"
+                style={{ animation: 'slideInLeft 0.25s ease-out' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                  <h3 className="text-lg font-bold text-gray-900">{t('shop.filters', 'Filters')}</h3>
                   <button
-                    onClick={() => setIsMobileFiltersOpen(false)}
-                    className="p-2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="p-2 text-gray-500 hover:text-gray-700 rounded-lg"
+                    aria-label={t('shop.close_filters_aria', 'Close filters')}
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
-                {/* Mobile Filter Content */}
-                <div className="p-4 space-y-6">
-                  {/* Categories */}
+<div
+                  className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 p-4 space-y-6"
+                  style={{
+                    WebkitOverflowScrolling: 'touch',
+                    overscrollBehavior: 'contain',
+                    touchAction: 'pan-y'
+                  }}
+                >
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Categories</h4>
-                    <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('shop.category', 'Category')}</h4>
+                    <div className="space-y-1">
                       <button
-                        onClick={() => {
-                          setSelectedCategory('');
-                          setIsMobileFiltersOpen(false);
-                        }}
-                        className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                          selectedCategory === '' 
-                            ? 'bg-blue-100 text-blue-900' 
-                            : 'text-gray-600 hover:bg-gray-100'
+                        onClick={() => setSelectedCategory('')}
+                        className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                          selectedCategory === '' ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                       >
-                        All Products
+                        {t('shop.all_products', 'All Products')}
                       </button>
-                      {Array.isArray(categories) && categories.map((category) => (
+                      {Array.isArray(categories) && categories.map((cat) => (
                         <button
-                          key={category.id}
-                          onClick={() => {
-                            setSelectedCategory(category.slug);
-                            setIsMobileFiltersOpen(false);
-                          }}
-                          className={`w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium ${
-                            selectedCategory === category.slug 
-                              ? 'bg-blue-100 text-blue-900' 
-                              : 'text-gray-600 hover:bg-gray-100'
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.slug)}
+                          className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                            selectedCategory === cat.slug ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                           }`}
                         >
-                          {category.name}
+                          {cat.name}
                         </button>
                       ))}
                     </div>
-                      </div>
-
-                  {/* Price Range Filter */}
+                  </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Price Range</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          type="number"
-                          placeholder="Min Price ($)"
-                          value={priceRange.min}
-                          onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Max Price ($)"
-                          value={priceRange.max}
-                          onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        />
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('shop.price_range', 'Price Range')}</h4>
+                    <div className="space-y-2">
+                      <input
+                        type="number"
+                        placeholder={t('shop.min_price', 'Min ($)')}
+                        value={priceRange.min}
+                        onChange={(e) => setPriceRange((prev) => ({ ...prev, min: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                      <input
+                        type="number"
+                        placeholder={t('shop.max_price', 'Max ($)')}
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange((prev) => ({ ...prev, max: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
                     </div>
                   </div>
-
-                  {/* Sort By Filter */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Sort By</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm uppercase">{t('shop.sort_by', 'Sort By')}</h4>
+                    <div className="space-y-1">
                       {[
-                        { value: '', label: 'Default' },
-                        { value: 'price_low', label: 'Price: Low to High' },
-                        { value: 'price_high', label: 'Price: High to Low' },
-                        { value: 'newest', label: 'Newest First' },
-                        { value: 'oldest', label: 'Oldest First' },
-                        { value: 'name', label: 'Name A-Z' }
-                      ].map((option) => (
+                        { value: '', label: t('shop.sort_default', 'Default') },
+                        { value: 'price_low', label: t('shop.price_low', 'Price: Low to High') },
+                        { value: 'price_high', label: t('shop.price_high', 'Price: High to Low') },
+                        { value: 'newest', label: t('shop.newest', 'Newest First') },
+                        { value: 'oldest', label: t('shop.oldest', 'Oldest First') },
+                        { value: 'name', label: t('shop.name_az', 'Name A-Z') }
+                      ].map((opt) => (
                         <button
-                          key={option.value}
-                          onClick={() => {
-                            setSortBy(option.value);
-                            setIsMobileFiltersOpen(false);
-                          }}
-                          className={`w-full text-left py-2 px-3 rounded-lg transition-all duration-200 text-sm font-medium ${
-                            sortBy === option.value 
-                              ? 'bg-blue-100 text-blue-900' 
-                              : 'text-gray-600 hover:bg-gray-100'
+                          key={opt.value}
+                          onClick={() => setSortBy(opt.value)}
+                          className={`w-full text-left py-2 px-3 rounded-lg transition-all text-sm font-medium ${
+                            sortBy === opt.value ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-100'
                           }`}
                         >
-                          {option.label}
+                          {opt.label}
                         </button>
                       ))}
                     </div>
                   </div>
-
-                  {/* Stock Status Filter */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Stock Status</h4>
-                    <div className="grid grid-cols-1 gap-2">
-                      {[
-                        { value: 'true', label: 'In Stock Only' },
-                        { value: 'false', label: 'Out of Stock Only' },
-                        { value: '', label: 'All Products' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => {
-                            // Stock filter disabled without backend - just close mobile filters
-                            setIsMobileFiltersOpen(false);
-                          }}
-                          className="w-full text-left py-3 px-4 rounded-lg transition-all duration-200 text-sm font-medium text-gray-600 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-                          disabled
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Product Condition Filter - Disabled until backend support */}
-                  <div className="opacity-50">
-                    <h4 className="font-semibold text-gray-900 mb-3 text-base">Product Condition (Coming Soon)</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { value: '', label: 'All Conditions' },
-                        { value: 'new', label: 'New' },
-                        { value: 'used', label: 'Used' },
-                        { value: 'refurbished', label: 'Refurbished' }
-                      ].map((option) => (
-                        <button
-                          key={option.value}
-                          disabled
-                          className="w-full text-left py-2 px-3 rounded-lg transition-all duration-200 text-sm font-medium text-gray-400 cursor-not-allowed"
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-
-
-                  {/* Mobile Filter Actions */}
-                  <div className="pt-6 border-t border-gray-200">
-                    <div className="flex space-x-3">
-                      <button
-                      onClick={() => {
-                        setSelectedCategory('');
-                        setPriceRange({ min: '', max: '' });
-                        setSortBy('');
-                        setProductCondition('');
-                      }}
-                        className="flex-1 px-4 py-3 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                      >
-                        Clear All
-                      </button>
-                      <button
-                        onClick={() => setIsMobileFiltersOpen(false)}
-                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                      >
-                        Apply Filters
-                      </button>
-                    </div>
-                  </div>
+                </div>
+                <div className="p-4 border-t border-gray-200 flex-shrink-0">
+                  <button
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    {t('shop.done', 'Done')}
+                  </button>
                 </div>
               </div>
             </div>
           )}
-          
+
+          {/* Mobile Search Dialog (vue.org style) with suggestions */}
+          {isMobileSearchOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsMobileSearchOpen(false)}
+              aria-modal="true"
+              role="dialog"
+              aria-label={t('shop.search_products_aria', 'Search products')}
+            >
+              <div
+                className="absolute top-0 left-0 right-0 max-h-[85vh] flex flex-col bg-white shadow-lg rounded-b-sm  overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 pb-3 flex items-center gap-2 flex-shrink-0">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      ref={mobileSearchInputRef}
+                      type="text"
+                      placeholder={t('shop.search_placeholder', 'Search products...')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl text-base "
+                    />
+                    {searchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                        aria-label={t('shop.clear_search_aria', 'Clear search')}
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileSearchOpen(false)}
+                    className="p-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium"
+                    aria-label={t('shop.close_search_aria', 'Close search')}
+                  >
+                    {t('common.cancel', 'Cancel')}
+                  </button>
+                </div>
+                {/* Suggestions list */}
+                {searchTerm.trim() && (
+                  <div className="border-t border-gray-100 overflow-y-auto flex-1 min-h-0">
+                    {searchSuggestions.length > 0 ? (
+                      <ul className="py-2" role="listbox">
+                        {searchSuggestions.map((product) => (
+                          <li key={product.id}>
+                            <Link
+                              to={`/products/${product.slug}`}
+                              onClick={() => setIsMobileSearchOpen(false)}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                              role="option"
+                            >
+                              {product.image_url && (
+                                <img
+                                  src={product.image_url}
+                                  alt=""
+                                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-gray-100"
+                                />
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-gray-900 truncate">{product.name || product.title}</div>
+                                <div className="text-sm text-primary-600">{formatPrice(product.final_price || product.price)}</div>
+                              </div>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                        {t('shop.no_products_for', 'No products found for "{search}"').replace('{search}', searchTerm.trim())}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Scrollable Products Container */}
           <div className="flex-1 overflow-y-auto p-4 pb-20 main-scrollbar scroll-container">
             {isLoading ? (
@@ -642,7 +669,7 @@ const Shop = () => {
                             return (
                               <div className="absolute top-2 left-2 z-10">
                                 <span className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-lg shadow-lg">
-                                  -{discountPercent}% OFF
+                                  {t('shop.percent_off', '-{percent}% OFF').replace('{percent}', discountPercent)}
                                 </span>
                               </div>
                             );
@@ -666,7 +693,7 @@ const Shop = () => {
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center">
                             <Eye className="w-8 h-8 text-white drop-shadow-lg mb-1" />
-                            <span className="text-white text-xs font-medium drop-shadow-lg">Click to enlarge</span>
+                            <span className="text-white text-xs font-medium drop-shadow-lg">{t('shop.click_to_enlarge', 'Click to enlarge')}</span>
                           </div>
                         </div>
                       </div>
@@ -692,7 +719,7 @@ const Shop = () => {
                               className="flex-shrink-0"
                             />
                             <span className="text-sm text-gray-500">
-                              ({product.review_count || 0} reviews)
+                              ({product.review_count || 0} {t('product_detail.reviews', 'reviews')})
                             </span>
                           </div>
                         </div>
@@ -706,7 +733,7 @@ const Shop = () => {
                                   const category = categories.find(cat => cat.slug === product.category_slug);
                                   return category ? category.name : product.category_slug;
                                 }
-                                return product.category_name || (typeof product.category === 'object' ? product.category?.name : product.category) || 'Uncategorized';
+                                return product.category_name || (typeof product.category === 'object' ? product.category?.name : product.category) || t('shop.uncategorized', 'Uncategorized');
                               })()}
                             </span>
                           </div>
@@ -721,9 +748,9 @@ const Shop = () => {
                               product.stock_status === 'low_stock' ? 'text-yellow-600' : 
                               'text-red-600'
                             }`}>
-                              {product.stock_status === 'in_stock' ? 'In Stock' : 
-                               product.stock_status === 'low_stock' ? 'Low Stock' : 
-                               'Out of Stock'}
+                              {product.stock_status === 'in_stock' ? t('shop.in_stock', 'In Stock') : 
+                               product.stock_status === 'low_stock' ? t('shop.low_stock', 'Low Stock') : 
+                               t('shop.out_of_stock', 'Out of Stock')}
                             </span>
                           </div>
                         </div>
@@ -742,7 +769,7 @@ const Shop = () => {
                                       {formatPrice(comparePrice)}
                                     </span>
                                     <span className="text-sm font-semibold text-green-600">
-                                      Save {formatPrice(comparePrice - finalPrice)}
+                                      {t('shop.save', 'Save')} {formatPrice(comparePrice - finalPrice)}
                                     </span>
                                   </div>
                                   <div className="text-right">
@@ -772,7 +799,7 @@ const Shop = () => {
                           className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-sm font-medium flex items-center justify-center space-x-1 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                         >
                           <Eye className="w-4 h-4" />
-                          <span>View Details</span>
+                          <span>{t('shop.view_details', 'View Details')}</span>
                         </button>
                       </div>
                     </div>
@@ -787,12 +814,12 @@ const Shop = () => {
                   <Package className="w-20 h-20 mx-auto opacity-50" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {debouncedSearchTerm ? `No products found for "${debouncedSearchTerm}"` : 'No products available'}
+                  {debouncedSearchTerm ? t('shop.no_products_for', 'No products found for "{search}"').replace('{search}', debouncedSearchTerm) : t('shop.no_products', 'No products available')}
                 </h3>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   {debouncedSearchTerm 
-                    ? `We couldn't find any products matching your search. Try different keywords or browse our categories.`
-                    : 'No products match your current filter criteria. Try adjusting your filters or browse all products.'
+                    ? t('shop.search_no_results_message', "We couldn't find any products matching your search. Try different keywords or browse our categories.")
+                    : t('shop.no_products_match', 'No products match your current filter criteria.')
                   }
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -801,7 +828,7 @@ const Shop = () => {
                       onClick={() => setSearchTerm('')}
                       className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                     >
-                      Clear Search
+                      {t('shop.clear_search', 'Clear Search')}
                     </button>
                   )}
                   {(selectedCategory || priceRange.min || priceRange.max || sortBy) && (
@@ -814,7 +841,7 @@ const Shop = () => {
                       }}
                       className="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                     >
-                      Clear All Filters
+                      {t('shop.clear_filters', 'Clear All Filters')}
                     </button>
                   )}
                 </div>
@@ -824,21 +851,21 @@ const Shop = () => {
         </div>
       </div>
 
-      {/* Image Modal */}
-      <ImageModal
+      {/* Full-screen image with zoom */}
+      <ImageLightbox
         isOpen={selectedImage !== null}
         onClose={() => setSelectedImage(null)}
         imageUrl={selectedImage?.url}
-        productName={selectedImage?.name}
+        title={selectedImage?.name}
       />
 
       {/* Scroll to Top Button - Hide when cart is open */}
       {showScrollTop && !isCartOpen && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-24 right-8 w-12 h-12 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50"
+          className="fixed bottom-5 right-5 w-12 h-12 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50"
           title="Scroll to top"
-          aria-label="Scroll to top"
+          aria-label={t('common.scroll_to_top', 'Scroll to top')}
         >
           <ChevronUp className="w-6 h-6" />
         </button>

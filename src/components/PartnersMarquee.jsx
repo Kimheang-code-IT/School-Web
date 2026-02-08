@@ -1,48 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from '../hooks/useTranslation.jsx';
-import partnersData from '../data/partners.json';
+import { usePartners } from '../hooks/usePartners.js';
+
+// Fallback: simple logo placeholder (SVG data URI) when image fails or is missing
+const FALLBACK_LOGO_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'%3E%3Crect fill='%23f3f4f6' width='120' height='60' rx='8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='system-ui' font-size='12'%3E%3Ctspan dy='0'%3ELogo%3C/tspan%3E%3C/text%3E%3C/svg%3E";
 
 const PartnersMarquee = () => {
-  // State management
-  const [partners, setPartners] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
+  const { data: partnersRaw = [], loading: isLoading, error } = usePartners();
+  const [failedImages, setFailedImages] = useState(new Set());
+
   const { t } = useTranslation();
 
-  // Load partners from JSON data
-  useEffect(() => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Transform JSON data to match component expectations
-      const transformedPartners = Array.isArray(partnersData)
-        ? partnersData
-            .filter(partner => partner.is_visible !== false)
-            .map(partner => ({
-              id: partner.id,
-              name: partner.name,
-              logo_url: partner.logo_url || partner.logo,
-              website_url: partner.website_url || partner.website
-            }))
-        : [];
-      
-      setPartners(transformedPartners);
-    } catch (err) {
-      console.error('Error loading partners:', err);
-      setError(err.message || 'Failed to load partners');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []); // Only run once on mount
+  const partners = useMemo(() => {
+    return Array.isArray(partnersRaw)
+      ? partnersRaw
+          .filter(partner => partner.is_visible !== false)
+          .map(partner => ({
+            id: partner.id,
+            name: partner.name,
+            logo_url: partner.logo_url || partner.logo,
+            website_url: partner.website_url || partner.website
+          }))
+      : [];
+  }, [partnersRaw]);
 
-  // Refresh partners data
+  const handleImageError = (partnerId) => {
+    setFailedImages((prev) => new Set(prev).add(partnerId));
+  };
 
   // Loading state
   if (isLoading) {
     return (
-      <section className="py-2 bg-gray-50 w-full">
+      <section className="py-4 bg-gray-50 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <div className="h-6 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
@@ -51,22 +40,6 @@ const PartnersMarquee = () => {
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex-shrink-0 w-32 h-16 bg-gray-200 rounded animate-pulse"></div>
             ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Error state
-  if (error && partners.length === 0) {
-    return (
-      <section className="py-2 bg-gray-50 w-full">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              {t('partners.title', 'Our Value Partners')}
-            </h2>
-            <div className="text-red-500 text-lg mb-4">{error}</div>
           </div>
         </div>
       </section>
@@ -103,7 +76,7 @@ const PartnersMarquee = () => {
   const infinitePartners = createInfiniteLoop(partners, 3);
 
   return (
-    <section className="py-2 bg-gray-50 w-full">
+    <section className="py-6 bg-gray-50 w-full">
       {/* Section Header - Centered with full width container */}
         <div className="w-full px-4 sm:px-6 lg:px-8 mb-4">
         <div className="text-center">
@@ -116,14 +89,6 @@ const PartnersMarquee = () => {
           <p className="text-gray-600">
             {t('partners.description', 'Trusted by leading organizations worldwide')}
           </p>
-          {/* Error message display */}
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg max-w-2xl mx-auto">
-              <p className="text-sm text-red-600">
-                {t('partners.loading_error', 'Some partners may not be available.')}
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
@@ -133,7 +98,7 @@ const PartnersMarquee = () => {
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
         
-        <div className="flex animate-marquee-smooth hover:pause-marquee px-4 sm:px-6 lg:px-8">
+        <div className="flex animate-marquee-smooth hover:pause-marquee py-4 px-4 sm:px-6 lg:px-8">
             {infinitePartners.map((partner, index) => (
               <div
                 key={partner.uniqueKey}
@@ -147,35 +112,53 @@ const PartnersMarquee = () => {
                     className="block transition-all duration-500 ease-out transform group-hover:scale-105 group-hover:-translate-y-1"
                     title={`Visit ${partner.name} website`}
                   >
-                    <div className="w-36 h-20 flex items-center justify-center bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-200 group-hover:border-primary-200">
-                      {partner.logo_url ? (
-                        <img
-                          src={partner.logo_url}
-                          alt={partner.name}
-                          className="max-w-full max-h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:brightness-110"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="text-gray-400 text-sm font-medium group-hover:text-primary-600 transition-colors duration-300">
-                          {partner.name}
-                        </div>
-                      )}
+                    <div className="w-36 h-24 flex flex-col items-center justify-center bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-200 group-hover:border-primary-200 overflow-hidden">
+                      <div className="w-full h-14 flex items-center justify-center flex-shrink-0 p-1">
+                        {partner.logo_url && !failedImages.has(partner.uniqueKey) ? (
+                          <img
+                            src={partner.logo_url}
+                            alt={partner.name}
+                            className="max-w-full max-h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:brightness-110"
+                            loading="lazy"
+                            onError={() => handleImageError(partner.uniqueKey)}
+                          />
+                        ) : (
+                          <img
+                            src={FALLBACK_LOGO_SVG}
+                            alt=""
+                            className="w-full h-full object-contain opacity-80"
+                            aria-hidden
+                          />
+                        )}
+                      </div>
+                      <span className="text-gray-500 text-xs font-medium text-center px-2 line-clamp-2 group-hover:text-primary-600 transition-colors flex-shrink-0">
+                        {partner.name}
+                      </span>
                     </div>
                   </a>
                 ) : (
-                  <div className="w-36 h-20 flex items-center justify-center bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
-                    {partner.logo_url ? (
-                      <img
-                        src={partner.logo_url}
-                        alt={partner.name}
-                        className="max-w-full max-h-full object-contain filter grayscale transition-all duration-300"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="text-gray-400 text-sm font-medium">
-                        {partner.name}
-                      </div>
-                    )}
+                  <div className="w-36 h-24 flex flex-col items-center justify-center bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md overflow-hidden">
+                    <div className="w-full h-14 flex items-center justify-center flex-shrink-0 p-1">
+                      {partner.logo_url && !failedImages.has(partner.uniqueKey) ? (
+                        <img
+                          src={partner.logo_url}
+                          alt={partner.name}
+                          className="max-w-full max-h-full object-contain filter grayscale transition-all duration-300"
+                          loading="lazy"
+                          onError={() => handleImageError(partner.uniqueKey)}
+                        />
+                      ) : (
+                        <img
+                          src={FALLBACK_LOGO_SVG}
+                          alt=""
+                          className="w-full h-full object-contain opacity-80"
+                          aria-hidden
+                        />
+                      )}
+                    </div>
+                    <span className="text-gray-500 text-xs font-medium text-center px-2 line-clamp-2 flex-shrink-0">
+                      {partner.name}
+                    </span>
                   </div>
                 )}
               </div>

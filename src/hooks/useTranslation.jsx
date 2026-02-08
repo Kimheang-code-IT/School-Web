@@ -1,39 +1,60 @@
 import { useState, useContext, createContext, useEffect } from 'react';
+import { get } from '../services/api.js';
+import { ENDPOINTS } from '../api/endpoints.js';
 import languagesData from '../data/languages.json';
 import translationsData from '../data/translations.json';
 
 const TranslationContext = createContext();
 
 export const TranslationProvider = ({ children }) => {
-  // Get initial language from localStorage or default to 'en'
+  // Get initial language from localStorage or default to 'en' (English and Khmer only)
   const getInitialLanguage = () => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('preferred-language');
-      return saved || 'en';
+      return (saved === 'en' || saved === 'km') ? saved : 'en';
     }
     return 'en';
   };
 
   const [currentLanguage, setCurrentLanguage] = useState(getInitialLanguage);
   const [translations, setTranslations] = useState({});
-  const [languages] = useState(languagesData);
+  const [languages, setLanguages] = useState(languagesData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load translations when language changes
+  // Optional: load language list from API once on mount, fallback to static
   useEffect(() => {
+    get(ENDPOINTS.LANGUAGES)
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setLanguages(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Load translations when language changes: try API first, fallback to static JSON
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(null);
-    try {
+    const fallback = () => {
+      if (cancelled) return;
       const translationsForLanguage = translationsData[currentLanguage] || {};
       setTranslations(translationsForLanguage);
-    } catch (err) {
-      console.error(`Failed to load translations for ${currentLanguage}:`, err);
-      setError(err.message);
-      setTranslations({});
-    } finally {
-      setLoading(false);
-    }
+    };
+    get(`${ENDPOINTS.TRANSLATIONS}?lang=${currentLanguage}`)
+      .then((data) => {
+        if (cancelled) return;
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          setTranslations(data);
+        } else {
+          fallback();
+        }
+      })
+      .catch(() => fallback())
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [currentLanguage]);
 
   // Update document language attribute when language changes
@@ -59,8 +80,14 @@ export const TranslationProvider = ({ children }) => {
   const setLanguage = changeLanguage;
 
   const t = (key, defaultValue = key) => {
-    // Return translation if available, otherwise return default value
-    return translations[key] || defaultValue;
+    if (!key || typeof key !== 'string') return defaultValue;
+    const parts = key.split('.');
+    let value = translations;
+    for (const part of parts) {
+      value = value?.[part];
+      if (value === undefined) return defaultValue;
+    }
+    return typeof value === 'string' ? value : defaultValue;
   };
 
   const value = {

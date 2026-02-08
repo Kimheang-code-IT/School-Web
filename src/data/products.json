@@ -20,10 +20,12 @@
     "rating": 4.5,
     "review_count": 234,
     "details": {
-      "options": {
-        "colors": ["Black", "White", "Blue"],
-        "sizes": ["Standard"]
-      }
+      "included": [
+        "Expert instruction",
+        "Course materials",
+        "Certificate of completion",
+        "Lifetime access to resources"
+      ]
     }
   },
   {
@@ -46,10 +48,12 @@
     "rating": 4.8,
     "review_count": 189,
     "details": {
-      "options": {
-        "colors": ["Black", "Silver", "Rose Gold"],
-        "sizes": ["42mm", "46mm"]
-      }
+      "included": [
+        "1-year warranty",
+        "Charging cable",
+        "Quick start guide",
+        "Free firmware updates"
+      ]
     }
   },
   {
@@ -72,10 +76,12 @@
     "rating": 4.3,
     "review_count": 145,
     "details": {
-      "options": {
-        "colors": ["Black", "Brown", "Navy"],
-        "sizes": ["13 inch", "15 inch", "17 inch"]
-      }
+      "included": [
+        "Water-resistant material",
+        "Padded laptop compartment",
+        "Multiple pockets",
+        "Adjustable shoulder strap"
+      ]
     }
   },
   {
@@ -98,10 +104,11 @@
     "rating": 4.6,
     "review_count": 312,
     "details": {
-      "options": {
-        "colors": ["Black", "White", "Pink"],
-        "sizes": ["Standard"]
-      }
+      "included": [
+        "Premium quality",
+        "Gift packaging available",
+        "Easy returns"
+      ]
     }
   },
   {
@@ -124,10 +131,12 @@
     "rating": 4.7,
     "review_count": 278,
     "details": {
-      "options": {
-        "colors": ["Black", "White"],
-        "sizes": ["Full Size", "TKL"]
-      }
+      "included": [
+        "Mechanical switches",
+        "RGB lighting",
+        "Detachable cable",
+        "Wrist rest"
+      ]
     }
   },
   {
@@ -150,10 +159,11 @@
     "rating": 4.4,
     "review_count": 567,
     "details": {
-      "options": {
-        "colors": ["Black", "White", "Red"],
-        "sizes": ["1m", "2m", "3m"]
-      }
+      "included": [
+        "Braided cable",
+        "Multiple length options",
+        "Gold-plated connector"
+      ]
     }
   },
   {
@@ -176,10 +186,12 @@
     "rating": 4.2,
     "review_count": 98,
     "details": {
-      "options": {
-        "colors": ["Silver", "Black"],
-        "sizes": ["Standard"]
-      }
+      "included": [
+        "HD video quality",
+        "Built-in microphone",
+        "Privacy cover",
+        "Compatible with all systems"
+      ]
     }
   },
   {
@@ -202,10 +214,12 @@
     "rating": 4.5,
     "review_count": 423,
     "details": {
-      "options": {
-        "colors": ["Black", "Blue", "Red"],
-        "sizes": ["Standard"]
-      }
+      "included": [
+        "Noise cancellation",
+        "Foldable design",
+        "Carrying case",
+        "AUX cable"
+      ]
     }
   },
   {
@@ -228,10 +242,11 @@
     "rating": 4.6,
     "review_count": 256,
     "details": {
-      "options": {
-        "colors": ["Black", "White"],
-        "sizes": ["Standard"]
-      }
+      "included": [
+        "Ergonomic design",
+        "Wireless connectivity",
+        "Long battery life"
+      ]
     }
   },
   {
@@ -254,10 +269,12 @@
     "rating": 4.4,
     "review_count": 187,
     "details": {
-      "options": {
-        "colors": ["Natural Bamboo", "Dark Bamboo"],
-        "sizes": ["Standard", "Large"]
-      }
+      "included": [
+        "Sustainable bamboo",
+        "Ergonomic design",
+        "USB-C connectivity",
+        "Recyclable packaging"
+      ]
     }
   }
 ]

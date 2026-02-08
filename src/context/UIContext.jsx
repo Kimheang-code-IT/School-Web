@@ -26,6 +26,11 @@ const uiReducer = (state, action) => {
         ...state,
         isCheckoutOpen: action.payload,
       };
+    case 'SET_MOBILE_MENU_OPEN':
+      return {
+        ...state,
+        isMobileMenuOpen: action.payload,
+      };
     default:
       return state;
   }
@@ -37,6 +42,7 @@ const initialState = {
   isCartOpen: false,
   isRegistrationOpen: false,
   isCheckoutOpen: false,
+  isMobileMenuOpen: false,
 };
 
 export const UIProvider = ({ children }) => {
@@ -58,12 +64,17 @@ export const UIProvider = ({ children }) => {
     dispatch({ type: 'SET_CHECKOUT_OPEN', payload: open });
   };
 
+  const setIsMobileMenuOpen = (open) => {
+    dispatch({ type: 'SET_MOBILE_MENU_OPEN', payload: open });
+  };
+
   const value = {
     ...state,
     setModal,
     setIsCartOpen,
     setIsRegistrationOpen,
     setIsCheckoutOpen,
+    setIsMobileMenuOpen,
   };
 
   return (

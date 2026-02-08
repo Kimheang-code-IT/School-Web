@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@100;300;400;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,6 +8,11 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Khmer UI: use Battambang when language is km */
+  html[lang="km"] {
+    font-family: "Battambang", system-ui, sans-serif;
   }
   
   body {
@@ -63,14 +68,39 @@
     overflow: hidden;
   }
   
-  .font-khmer {
-    font-family: 'Noto Sans Khmer', 'Inter', system-ui, sans-serif;
+  /* Battambang weight utilities (use when lang=km or for Khmer blocks) */
+  .battambang-thin {
+    font-family: "Battambang", system-ui, sans-serif;
+    font-weight: 100;
+    font-style: normal;
   }
-  
+  .battambang-light {
+    font-family: "Battambang", system-ui, sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+  .battambang-regular {
+    font-family: "Battambang", system-ui, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  .battambang-bold {
+    font-family: "Battambang", system-ui, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+  }
+  .battambang-black {
+    font-family: "Battambang", system-ui, sans-serif;
+    font-weight: 900;
+    font-style: normal;
+  }
+
+  .font-khmer {
+    font-family: "Battambang", "Inter", system-ui, sans-serif;
+  }
   .font-khmer-muol {
-    /* Khmer OS Muol Light is not available on Google Fonts, using Noto Sans Khmer as fallback */
-    font-family: 'Noto Sans Khmer', 'Inter', system-ui, sans-serif;
-    font-weight: 600;
+    font-family: "Battambang", "Inter", system-ui, sans-serif;
+    font-weight: 700;
     letter-spacing: 0.02em;
   }
   
@@ -244,6 +274,8 @@
     left: 0;
     right: 0;
     bottom: 0;
+    height: 100vh;
+    height: 100dvh;
     z-index: 50;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
@@ -256,12 +288,23 @@
   .mobile-filter-content {
     background: white;
     height: 100%;
+    max-height: 100%;
     width: 100%;
     max-width: 20rem;
-    overflow-y: auto;
     animation: slideInLeft 0.3s ease-out;
     margin-left: 0;
     margin-right: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  
+  .mobile-filter-scroll-body {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
   }
   
   @media (min-width: 640px) {

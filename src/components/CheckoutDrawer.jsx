@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext.jsx';
 import { useUI } from '../context/UIContext.jsx';
 import { formatPrice } from '../utils/priceUtils.jsx';
+import { useTranslation } from '../hooks/useTranslation.jsx';
 import { X, CreditCard, User, MapPin, Mail, Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -10,6 +11,7 @@ import ErrorDialog from './ErrorDialog.jsx';
 // Note: Checkout submission is disabled without backend API
 
 const CheckoutDrawer = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const { items, getTotalPrice, clearCart } = useCart();
   const { setIsCartOpen, setIsCheckoutOpen } = useUI();
   const navigate = useNavigate();
@@ -367,7 +369,6 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
       }
       
     } catch (error) {
-      console.error('Order creation error:', error);
       
       // Clear all form data
       setFormData({
@@ -425,14 +426,14 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
           <h2 id="checkout-title" className="text-lg font-semibold text-gray-900">
-            Checkout
+            {t('checkout.title', 'Checkout')}
           </h2>
           <button
             ref={firstFocusableRef}
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg"
-            aria-label="Close checkout"
-            title="Close checkout"
+            aria-label={t('checkout.close_checkout', 'Close checkout')}
+            title={t('checkout.close_checkout', 'Close checkout')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -447,19 +448,19 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <User className="w-5 h-5 mr-2" />
-                  Personal Information
+                  {t('checkout.personal_info', 'Personal Information')}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                      First Name <span className="text-red-500">*</span>
+                      {t('checkout.first_name', 'First Name')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       ref={errors.firstName && !firstErrorRef.current ? (el) => { firstErrorRef.current = el; } : null}
                       type="text"
                       id="firstName"
                       name="firstName"
-                      placeholder="First Name"
+                      placeholder={t('checkout.first_name', 'First Name')}
                       value={formData.firstName}
                       onChange={handleInputChange}
                       className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
@@ -477,14 +478,14 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                   </div>
                   <div className="space-y-1">
                     <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                      Last Name <span className="text-red-500">*</span>
+                      {t('checkout.last_name', 'Last Name')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       ref={errors.lastName && !firstErrorRef.current ? (el) => { firstErrorRef.current = el; } : null}
                       type="text"
                       id="lastName"
                       name="lastName"
-                      placeholder="Last Name"
+                      placeholder={t('checkout.last_name', 'Last Name')}
                       value={formData.lastName}
                       onChange={handleInputChange}
                       className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
@@ -503,14 +504,14 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email Address <span className="text-red-500">*</span>
+                    {t('checkout.email_address', 'Email Address')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     ref={errors.email && !firstErrorRef.current ? (el) => { firstErrorRef.current = el; } : null}
                     type="email"
                     id="email"
                     name="email"
-                    placeholder="Email Address"
+                    placeholder={t('checkout.email_address', 'Email Address')}
                     value={formData.email}
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
@@ -528,7 +529,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone Number <span className="text-red-500">*</span>
+                    {t('checkout.phone_number', 'Phone Number')} <span className="text-red-500">*</span>
                   </label>
                   <div className={`flex border rounded-lg overflow-hidden ${
                     errors.phone 
@@ -543,7 +544,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                       type="tel"
                       id="phone"
                       name="phone"
-                      placeholder="Enter your phone number"
+                      placeholder={t('contact.placeholder_phone', 'Enter your phone number')}
                       value={formData.phone}
                       onChange={handleInputChange}
                       className="flex-1 px-3 py-2 border-0 focus:outline-none focus:ring-0"
@@ -562,18 +563,18 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <MapPin className="w-5 h-5 mr-2" />
-                  Shipping Address
+                  {t('checkout.shipping_address', 'Shipping Address')}
                 </h3>
                 <div className="space-y-1">
                   <label htmlFor="streetAddress" className="block text-sm font-medium text-gray-700">
-                    Street Address <span className="text-red-500">*</span>
+                    {t('checkout.street_address', 'Street Address')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     ref={errors.streetAddress && !firstErrorRef.current ? (el) => { firstErrorRef.current = el; } : null}
                     type="text"
                     id="streetAddress"
                     name="streetAddress"
-                    placeholder="Street Address"
+                    placeholder={t('checkout.street_address', 'Street Address')}
                     value={formData.streetAddress}
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
@@ -591,7 +592,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="province" className="block text-sm font-medium text-gray-700">
-                    Province <span className="text-red-500">*</span>
+                    {t('checkout.province', 'Province')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     ref={errors.province && !firstErrorRef.current ? (el) => { firstErrorRef.current = el; } : null}
@@ -657,8 +658,8 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                       className="mr-3"
                     />
                     <div>
-                      <div className="font-medium">Standard Delivery</div>
-                      <div className="text-sm text-gray-500">5-7 business days - Free</div>
+                      <div className="font-medium">{t('checkout.delivery_standard', 'Standard Delivery')}</div>
+                      <div className="text-sm text-gray-500">{t('checkout.delivery_standard_desc', '5-7 business days - Free')}</div>
                     </div>
                   </label>
                   <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -671,8 +672,8 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                       className="mr-3"
                     />
                     <div>
-                      <div className="font-medium">Express Delivery</div>
-                      <div className="text-sm text-gray-500">2-3 business days - $9.99</div>
+                      <div className="font-medium">{t('checkout.delivery_express', 'Express Delivery')}</div>
+                      <div className="text-sm text-gray-500">{t('checkout.delivery_express_desc', '2-3 business days - $9.99')}</div>
                     </div>
                   </label>
                   <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -685,8 +686,8 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                       className="mr-3"
                     />
                     <div>
-                      <div className="font-medium">Overnight Delivery</div>
-                      <div className="text-sm text-gray-500">Next business day - $19.99</div>
+                      <div className="font-medium">{t('checkout.delivery_overnight', 'Overnight Delivery')}</div>
+                      <div className="text-sm text-gray-500">{t('checkout.delivery_overnight_desc', 'Next business day - $19.99')}</div>
                     </div>
                   </label>
                 </div>
@@ -696,16 +697,16 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <Mail className="w-5 h-5 mr-2" />
-                  Additional Information
+                  {t('checkout.additional_info', 'Additional Information')}
                 </h3>
                 <div className="space-y-1">
                   <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                    Special Instructions or Notes
+                    {t('checkout.notes_placeholder', 'Special Instructions or Notes')}
                   </label>
                   <textarea
                     id="notes"
                     name="notes"
-                    placeholder="Special instructions or notes (optional)"
+                    placeholder={t('checkout.notes_placeholder', 'Special instructions or notes (optional)')}
                     value={formData.notes}
                     onChange={handleInputChange}
                     rows="3"
@@ -726,7 +727,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                       }`}
                     />
                     <label htmlFor="terms" className="text-sm text-gray-700">
-                      I agree to the{' '}
+                      {t('checkout.terms_agree', 'I agree to the')}{' '}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -735,7 +736,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                         }}
                         className="text-primary-600 hover:text-primary-700 hover:underline font-medium transition-colors"
                       >
-                        terms and conditions
+                        {t('checkout.terms_link', 'terms and conditions')}
                       </button>
                       <span className="text-red-500 ml-1">*</span>
                     </label>
@@ -753,7 +754,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
             {/* Footer */}
             <div className="border-t border-gray-200 p-4 space-y-4 flex-shrink-0">
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-lg font-semibold text-gray-900">Total</span>
+                <span className="text-lg font-semibold text-gray-900">{t('checkout.total', 'Total')}</span>
                 <span className="text-xl font-bold text-primary-600">{formatPrice(getTotalPrice())}</span>
               </div>
               <button
@@ -764,12 +765,12 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Processing...</span>
+                    <span>{t('checkout.processing', 'Processing...')}</span>
                   </>
                 ) : (
                   <>
                     <CreditCard className="w-4 h-4" />
-                    <span>Complete Order</span>
+                    <span>{t('checkout.complete_order', 'Complete Order')}</span>
                   </>
                 )}
               </button>
@@ -784,10 +785,10 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
           isOpen={showConfirmDialog}
           onClose={() => setShowConfirmDialog(false)}
           onConfirm={handleConfirmOrder}
-          title="Confirm Order"
-          message="Are you sure you want to complete this order?"
-          confirmText="Yes, Complete Order"
-          cancelText="No, Cancel"
+          title={t('checkout.confirm_order', 'Confirm Order')}
+          message={t('checkout.confirm_message', 'Are you sure you want to complete this order?')}
+          confirmText={t('checkout.confirm_yes', 'Yes, Complete Order')}
+          cancelText={t('checkout.confirm_cancel', 'No, Cancel')}
           type="question"
         />
       )}
@@ -836,9 +837,9 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
             <div className="flex-shrink-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white p-6 flex items-center justify-between z-10">
               <div>
                 <h2 id="terms-modal-title" className="text-2xl font-bold mb-1">
-                  Terms and Conditions
+                  {t('registration.terms_modal_title', 'Terms and Conditions')}
                 </h2>
-                <p className="text-blue-100 text-sm">Please read carefully before proceeding</p>
+                <p className="text-blue-100 text-sm">{t('checkout.terms_subtitle', 'Please read carefully before proceeding')}</p>
               </div>
               <button
                 onClick={() => setShowTermsModal(false)}
@@ -862,7 +863,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
             >
               <div className="space-y-4 text-gray-700">
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Order Agreement</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">1. {t('checkout.order_agreement', 'Order Agreement')}</h3>
                   <p className="text-sm leading-relaxed">
                     By placing an order with us, you agree to abide by all terms and conditions outlined herein.
                     All orders are subject to product availability and our acceptance of your order.
@@ -870,7 +871,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Product Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">2. {t('checkout.product_info', 'Product Information')}</h3>
                   <p className="text-sm leading-relaxed">
                     We strive to provide accurate product descriptions, images, and pricing. However, we reserve 
                     the right to correct any errors, inaccuracies, or omissions and to change or update information 
@@ -879,7 +880,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Pricing and Payment</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">3. {t('checkout.pricing_payment', 'Pricing and Payment')}</h3>
                   <p className="text-sm leading-relaxed">
                     All prices are displayed in USD and are subject to change without notice. Payment must be 
                     received in full before order processing. We accept various payment methods as indicated 
@@ -888,7 +889,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Shipping and Delivery</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">4. {t('checkout.shipping_delivery', 'Shipping and Delivery')}</h3>
                   <p className="text-sm leading-relaxed">
                     Shipping costs and delivery times vary based on your location and selected delivery method. 
                     Delivery dates are estimates and not guaranteed. We are not responsible for delays caused 
@@ -897,7 +898,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">5. Returns and Refunds</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">5. {t('checkout.returns_refunds', 'Returns and Refunds')}</h3>
                   <p className="text-sm leading-relaxed">
                     Returns are accepted within 30 days of delivery for unused items in original packaging. 
                     Refund processing may take 5-10 business days after we receive and inspect the returned item. 
@@ -906,7 +907,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">6. Order Cancellation</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">6. {t('checkout.order_cancellation', 'Order Cancellation')}</h3>
                   <p className="text-sm leading-relaxed">
                     You may cancel your order before it ships. Once an order has been shipped, cancellation is 
                     not possible, but you may return the item according to our return policy. We reserve the 
@@ -915,7 +916,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">7. Privacy and Data Protection</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">7. {t('checkout.privacy_data', 'Privacy and Data Protection')}</h3>
                   <p className="text-sm leading-relaxed">
                     We are committed to protecting your personal information. All data collected during checkout 
                     will be used solely for order processing, shipping, and communication purposes, in accordance 
@@ -924,7 +925,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">8. Limitation of Liability</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">8. {t('checkout.limitation_liability', 'Limitation of Liability')}</h3>
                   <p className="text-sm leading-relaxed">
                     Our liability for any claim arising from your purchase is limited to the purchase price of 
                     the product. We are not liable for any indirect, incidental, or consequential damages.
@@ -932,7 +933,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">9. Changes to Terms</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">9. {t('checkout.changes_terms', 'Changes to Terms')}</h3>
                   <p className="text-sm leading-relaxed">
                     We reserve the right to modify these terms and conditions at any time. Changes will be 
                     effective immediately upon posting. Your continued use of our services constitutes acceptance 
@@ -941,7 +942,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">10. Contact Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">10. {t('checkout.contact_info', 'Contact Information')}</h3>
                   <p className="text-sm leading-relaxed">
                     For questions or concerns regarding these terms or your order, please contact our customer 
                     service team through the contact information provided on our website.
@@ -950,8 +951,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
 
                 <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
                   <p className="text-sm text-blue-900 font-medium">
-                    <strong>By checking the box above, you acknowledge that you have read, understood, and agree 
-                    to be bound by these terms and conditions.</strong>
+                    <strong>{t('checkout.terms_acknowledge', 'By checking the box above, you acknowledge that you have read, understood, and agree to these terms.')}</strong>
                   </p>
                 </div>
               </div>
@@ -963,7 +963,7 @@ const CheckoutDrawer = ({ isOpen, onClose }) => {
                 onClick={() => setShowTermsModal(false)}
                 className="px-6 py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
               >
-                I Understand
+                {t('checkout.i_understand', 'I Understand')}
               </button>
             </div>
           </div>

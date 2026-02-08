@@ -7,11 +7,10 @@ const LanguageDropdown = ({ isOpen, onClose, triggerRef }) => {
   const firstFocusableRef = useRef(null);
   const [selectedLanguage, setSelectedLanguage] = useState(currentLanguage);
 
-  // Default languages fallback (if API fails)
+  // Default languages: English and Khmer only
   const defaultLanguages = [
     { code: 'en', name: 'English', flagImage: '/english.png' },
     { code: 'km', name: 'ខ្មែរ', flagImage: '/cambodia.png' },
-    { code: 'zh', name: '中文', flagImage: '/chinese.png' },
   ];
 
   // Map language codes to flag images
@@ -19,15 +18,14 @@ const LanguageDropdown = ({ isOpen, onClose, triggerRef }) => {
     const displayMap = {
       'en': { name: 'English', flagImage: '/english.png' },
       'km': { name: 'ខ្មែរ', flagImage: '/cambodia.png' },
-      'zh': { name: '中文', flagImage: '/chinese.png' },
     };
     return displayMap[code] || { name: code.toUpperCase(), flagImage: '/english.png' };
   };
 
-  // Get languages from API or use defaults
+  // Get languages from API or use defaults (English and Khmer only)
   const availableLanguages = languages && languages.length > 0 
     ? languages
-        .filter(lang => ['en', 'km', 'zh'].includes(lang.code))
+        .filter(lang => ['en', 'km'].includes(lang.code))
         .map(lang => ({
           code: lang.code,
           name: lang.name,
@@ -102,7 +100,6 @@ const LanguageDropdown = ({ isOpen, onClose, triggerRef }) => {
         onClose();
       }, 150);
     } else {
-      console.error('setLanguage is not a function');
     }
   };
 

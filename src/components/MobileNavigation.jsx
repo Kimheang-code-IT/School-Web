@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+
+const ANIMATION_DURATION = 300;
 
 const MobileNavigation = ({ 
   isOpen, 
@@ -12,6 +14,20 @@ const MobileNavigation = ({
 }) => {
   const panelRef = useRef(null);
   const firstFocusableRef = useRef(null);
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setIsExiting(false);
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      triggerRef?.current?.focus();
+      onClose();
+      setIsExiting(false);
+    }, ANIMATION_DURATION);
+  };
 
   // Focus management
   useEffect(() => {
@@ -59,65 +75,58 @@ const MobileNavigation = ({
 
   // Handle backdrop click
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    if (e.target === e.currentTarget) handleClose();
   };
 
   // Handle navigation link click
   const handleNavClick = () => {
-    onClose();
+    handleClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isExiting) return null;
+
+  const showPanel = isOpen && !isExiting;
 
   return (
     <div 
       className="fixed inset-0 z-50 overflow-hidden"
       onClick={handleBackdropClick}
     >
-      {/* Backdrop */}
+      {/* Backdrop - smooth fade */}
       <div 
-        className="absolute inset-0 bg-black/35 transition-opacity duration-150 ease-out"
-        style={{
-          animation: isOpen ? 'fadeIn 150ms ease-out' : 'fadeOut 150ms ease-in'
-        }}
+        className={`absolute inset-0 bg-black/40 transition-all duration-300 ease-out ${
+          showPanel ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
       />
       
-      {/* Panel */}
+      {/* Panel - slide up from bottom with smooth transition */}
       <div 
         ref={panelRef}
-        className="absolute left-0 top-0 h-full w-full max-w-sm bg-white shadow-xl transform transition-transform duration-280 ease-out"
-        style={{
-          animation: isOpen ? 'slideInLeft 280ms cubic-bezier(0.4, 0, 0.2, 1)' : 'slideOutLeft 280ms cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
+        className={`absolute inset-x-0 bottom-0 top-auto max-h-[90vh] w-full rounded-t-2xl bg-white shadow-2xl transition-all duration-300 ease-out ${
+          showPanel ? 'translate-y-0' : 'translate-y-full'
+        }`}
+        style={{ transitionTimingFunction: 'cubic-bezier(0.32, 0.72, 0, 1)' }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="mobile-nav-title"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center">
             <img 
               src="/logo.png" 
-              alt="ដំណាក់សិក្សា - Learning Platform"
-              className="w-8 h-8 object-contain"
+              alt="Logo"
+              className="w-10 h-10 object-contain"
               onError={(e) => {
                 e.target.style.display = 'none';
               }}
             />
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-blue-800 font-khmer-muol">
-                ដំណាក់សិក្សា
-              </span>
-              <span className="text-xs text-blue-600 font-medium">
-                LEARNING FOR GROWING
-              </span>
-            </div>
           </div>
           <button
             ref={firstFocusableRef}
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg"
             aria-label="Close menu"
             title="Close menu"
@@ -129,7 +138,7 @@ const MobileNavigation = ({
         </div>
 
         {/* Navigation Content */}
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col overflow-y-auto max-h-[calc(90vh-5rem)]">
           {/* Navigation Links */}
           <nav className="flex-1 p-4 pb-8 space-y-1">
             <h2 id="mobile-nav-title" className="sr-only">Mobile Navigation</h2>
@@ -180,32 +189,8 @@ const MobileNavigation = ({
 
 
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
-        }
-        @keyframes slideInLeft {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes slideOutLeft {
-          from { transform: translateX(0); }
-          to { transform: translateX(-100%); }
-        }
-        @keyframes slideInUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        @keyframes slideOutDown {
-          from { transform: translateY(0); }
-          to { transform: translateY(100%); }
-        }
         @media (prefers-reduced-motion: reduce) {
-          .transition-transform, .transition-opacity {
+          .transition-all {
             transition: none;
           }
         }

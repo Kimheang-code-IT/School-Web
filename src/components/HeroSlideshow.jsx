@@ -1,53 +1,36 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, BookOpen } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation.jsx';
-import heroSlidesData from '../data/heroSlides.json';
+import { useHeroSlides } from '../hooks/useHeroSlides.js';
 
 const HeroSlideshow = () => {
-  // State management
-  const [slides, setSlides] = useState([]);
+  const { data: heroSlidesRaw = [], loading: isLoading, error } = useHeroSlides();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const intervalRef = useRef(null);
   const touchStartRef = useRef(null);
   const touchEndRef = useRef(null);
   const slideshowRef = useRef(null);
-  
+
   const { t } = useTranslation();
 
-  // Load hero slides from JSON data
-  useEffect(() => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Filter active slides and transform to match component expectations
-      const activeSlides = Array.isArray(heroSlidesData) 
-        ? heroSlidesData
-            .filter(slide => slide.is_active !== false)
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .map(slide => ({
-              id: slide.id,
-              title: slide.title,
-              subtitle: slide.subtitle,
-              button_text: slide.button_text,
-              image_url: slide.image_url || slide.image,
-              duration: slide.duration || 5,
-              is_active: slide.is_active,
-              order: slide.order
-            }))
-        : [];
-      
-      setSlides(activeSlides);
-    } catch (err) {
-      console.error('Error loading hero slides:', err);
-      setError(err.message || 'Failed to load slideshow');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []); // Only run once on mount
+  const slides = useMemo(() => {
+    const raw = Array.isArray(heroSlidesRaw) ? heroSlidesRaw : [];
+    return raw
+      .filter(slide => slide && slide.is_active !== false)
+      .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
+      .map(slide => ({
+        id: slide.id,
+        title: slide.title ?? '',
+        subtitle: slide.subtitle ?? null,
+        button_text: slide.button_text ?? null,
+        button_link: slide.button_link ?? '/shop',
+        image_url: slide.image_url || slide.image || '',
+        duration: slide.duration ?? 5,
+        is_active: slide.is_active,
+        order: slide.order
+      }));
+  }, [heroSlidesRaw]); // Only run once on mount
 
   // Auto-scroll functionality - uses individual slide durations
   useEffect(() => {
@@ -131,24 +114,6 @@ const HeroSlideshow = () => {
     );
   }
 
-  // Error state
-  if (error && slides.length === 0) {
-    return (
-      <div className="relative w-full h-screen bg-gradient-to-br from-red-50 to-red-100">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-red-800 mb-4">
-              {t('hero.error', 'Error Loading Slideshow')}
-            </h1>
-            <p className="text-xl text-red-600 mb-4">
-              {error}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // No slides state
   if (slides.length === 0) {
     return (
@@ -210,7 +175,7 @@ const HeroSlideshow = () => {
                 {currentSlideData.button_text && (
                   <div className="flex justify-start">
                     <Link
-                      to="/shop"
+                      to={currentSlideData.button_link || '/shop'}
                       className="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-primary-600 text-white text-sm sm:text-base md:text-lg font-semibold rounded-lg hover:bg-primary-700 shadow-lg hover:shadow-xl"
                     >
                       {currentSlideData.button_text}
@@ -243,172 +208,8 @@ const HeroSlideshow = () => {
 
       </div>
 
-      {/* Feature Cards Section - Redesigned */}
-      <section className="py-2 sm:py-3 bg-gradient-to-br from-gray-50 via-white to-gray-50 w-screen relative left-1/2 -translate-x-1/2">
-        <div className="w-full">
-          {/* Desktop Grid Layout */}
-          <div className="hidden md:grid grid-cols-2 gap-6 px-4 sm:px-6 lg:px-8">
-            {/* Products Card */}
-            <Link
-              to="/shop"
-              className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-blue-100/50 hover:border-blue-200 transition-all duration-500 transform hover:-translate-y-2"
-            >
-              {/* Decorative Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-              </div>
-              
-              <div className="relative p-6">
-                {/* Header Section */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-16 h-16 flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <ShoppingBag className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">500+</div>
-                    <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mt-0.5">Products</div>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors duration-300">
-                  Shop Quality Products
-                </h3>
-                <p className="text-base text-gray-600 mb-4 leading-relaxed">
-                  Browse our extensive catalog of electronics, fashion, books, and home goods. 
-                  All products are carefully selected for quality and value.
-                </p>
-
-                {/* CTA Button */}
-                <div className="inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group-hover:shadow-blue-500/50">
-                  <span>Explore Products</span>
-                  <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Courses Card */}
-            <Link
-              to="/courses"
-              className="group relative bg-gradient-to-br from-white to-green-50/30 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-green-100/50 hover:border-green-200 transition-all duration-500 transform hover:-translate-y-2"
-            >
-              {/* Decorative Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-green-600 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-              </div>
-              
-              <div className="relative p-6">
-                {/* Header Section */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-16 h-16 flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <BookOpen className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800">50+</div>
-                    <div className="text-xs font-semibold text-green-600 uppercase tracking-wider mt-0.5">Courses</div>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-green-700 transition-colors duration-300">
-                  Learn New Skills
-                </h3>
-                <p className="text-base text-gray-600 mb-4 leading-relaxed">
-                  Enroll in our professional courses covering IT, business, languages, and more. 
-                  Learn from industry experts and advance your career.
-                </p>
-
-                {/* CTA Button */}
-                <div className="inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group-hover:shadow-green-500/50">
-                  <span>View Courses</span>
-                  <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Mobile Horizontal Scroll Layout */}
-          <div className="md:hidden flex gap-8 sm:gap-12 overflow-x-auto pb-2 snap-x snap-mandatory mx-2">
-            {/* Products Card */}
-            <Link
-              to="/shop"
-              className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden border border-blue-100/50 flex-shrink-0 w-[calc(100vw-1rem)] sm:w-[calc(100vw-1rem)] snap-center transition-all duration-300"
-            >
-              {/* Decorative Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-              </div>
-              
-              <div className="relative p-4 sm:p-6">
-                {/* Header Section */}
-                <div className="flex items-start justify-between mb-3 sm:mb-3">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                    <ShoppingBag className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">500+</div>
-                    <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mt-0.5">Products</div>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
-                  Shop Quality Products
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed">
-                  Browse our extensive catalog of electronics, fashion, books, and home goods. 
-                  All products are carefully selected for quality and value.
-                </p>
-
-                {/* CTA Button */}
-                <div className="inline-flex items-center justify-center w-full px-5 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg">
-                  <span className="text-sm sm:text-base">Explore Products</span>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Courses Card */}
-            <Link
-              to="/courses"
-              className="group relative bg-gradient-to-br from-white to-green-50/30 rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden border border-green-100/50 flex-shrink-0 w-[calc(100vw-1rem)] sm:w-[calc(100vw-1rem)] snap-center transition-all duration-300"
-            >
-              {/* Decorative Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-green-600 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-              </div>
-              
-              <div className="relative p-4 sm:p-6">
-                {/* Header Section */}
-                <div className="flex items-start justify-between mb-3 sm:mb-3">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                    <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800">50+</div>
-                    <div className="text-xs font-semibold text-green-600 uppercase tracking-wider mt-0.5">Courses</div>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
-                  Learn New Skills
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed">
-                  Enroll in our professional courses covering IT, business, languages, and more. 
-                  Learn from industry experts and advance your career.
-                </p>
-
-                {/* CTA Button */}
-                <div className="inline-flex items-center justify-center w-full px-5 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-lg">
-                  <span className="text-sm sm:text-base">View Courses</span>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
+    
+      
     </div>
   );
 };

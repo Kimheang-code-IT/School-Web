@@ -1,7 +1,7 @@
 import React from 'react';
 import HeroSlideshow from '../components/HeroSlideshow.jsx';
 import AcademicPrograms from '../components/AcademicPrograms.jsx';
-import NewsSection from '../components/NewsSection.jsx';
+
 import PartnersMarquee from '../components/PartnersMarquee.jsx';
 
 const Home = () => {
@@ -12,9 +12,6 @@ const Home = () => {
 
         {/* Academic Programs */}
         <AcademicPrograms />
-
-        {/* News Section */}
-        <NewsSection />
 
         {/* Partners Marquee */}
         <PartnersMarquee />

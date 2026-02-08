@@ -1,24 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="km">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="%PUBLIC_URL%/logo-web.png" type="image/png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#3B82F6" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- SEO -->
+    <title>ដំណាក់សិក្សា</title>
     <meta
       name="description"
-      content="Fast and optimized e-commerce platform for Cambodia - Shop products and enroll in courses"
+      content="ដំណាក់សិក្សា - ទិញផលិតផល និងចុះឈ្មោះវគ្គសិក្សានៅកម្ពុជា។ Fast e-commerce and courses platform."
     />
-    <meta name="keywords" content="ecommerce, shop, cambodia, fast, optimized, products, courses" />
-    <meta name="author" content="WebsiteEcom" />
-    
+    <meta name="keywords" content="ដំណាក់សិក្សា, ecommerce, shop, cambodia, courses, វគ្គសិក្សា, ផលិតផល, domnakseuksaa" />
+    <meta name="author" content="ដំណាក់សិក្សា" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="%PUBLIC_URL%/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ដំណាក់សិក្សា - Shop &amp; Learn Platform" />
+    <meta property="og:description" content="ដំណាក់សិក្សា - ទិញផលិតផល និងចុះឈ្មោះវគ្គសិក្សានៅកម្ពុជា។" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo-web.png" />
+    <meta property="og:url" content="%PUBLIC_URL%/" />
+    <meta property="og:locale" content="km_KH" />
+    <meta property="og:site_name" content="ដំណាក់សិក្សា" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ដំណាក់សិក្សា - Shop &amp; Learn Platform" />
+    <meta name="twitter:description" content="ដំណាក់សិក្សា - ទិញផលិតផល និងចុះឈ្មោះវគ្គសិក្សានៅកម្ពុជា។" />
+    <meta name="twitter:image" content="%PUBLIC_URL%/logo-web.png" />
+
     <!-- Content Security Policy for development -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self' http://localhost:8000 http://127.0.0.1:8000;
       img-src 'self' data: https: http://localhost:8000 http://127.0.0.1:8000;
       media-src 'self' http://localhost:8000 http://127.0.0.1:8000;
-      connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 https://script.google.com https://*.googleusercontent.com;
-      frame-src 'self' http://localhost:8000 http://127.0.0.1:8000;
+      connect-src 'self' http://localhost:8000 http://127.0.0.1:8000;
+      frame-src 'self' http://localhost:8000 http://127.0.0.1:8000 https://www.openstreetmap.org https://www.google.com;
       script-src 'self' 'unsafe-inline' 'unsafe-eval';
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com;
@@ -29,20 +50,20 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Critical CSS inline -->
+
+    <!-- Fonts: Khmer (Battambang) + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@100;300;400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Battambang:wght@100;300;400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+    <!-- Critical CSS inline (Battambang for Khmer, Inter fallback) -->
     <style>
-      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+      body { margin: 0; font-family: 'Battambang', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
       #root { min-height: 100vh; }
       .loading { display: flex; justify-content: center; align-items: center; height: 100vh; }
     </style>
-    
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo-web.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    
-    <title>WebsiteEcom - Fast Shop & Learn Platform</title>
     <!-- Load API configuration before React app -->
     <script src="%PUBLIC_URL%/config.js"></script>
   </head>
